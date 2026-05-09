@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { existsSync, readFileSync } from 'node:fs';
@@ -15,6 +16,7 @@ const httpsCfg =
     : undefined;
 
 export default defineConfig({
+  plugins: [react()],
   publicDir: 'public',
   server: {
     port: 3000,

@@ -21,7 +21,7 @@ type SpawnSeed = {
 };
 
 const SEEDS: SpawnSeed[] = [
-  { id: 1, name: "Machoke", key: "machoke", lat: 52.365551, lng: 4.8431344 },
+  { id: 1, name: "Machoke", key: "machoke", lat: 52.366933, lng: 4.843385 },
   { id: 2, name: "Gengar", key: "gengar", lat: 52.367472, lng: 4.843385 },
   { id: 3, name: "Hypno", key: "hypno", lat: 52.366933, lng: 4.844268 },
   {

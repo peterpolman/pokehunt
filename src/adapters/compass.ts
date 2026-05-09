@@ -10,8 +10,13 @@
 // Absolute is preferred whenever it fires; relative is used only after
 // the first 3s if no absolute has arrived.
 
-import { distanceMeters, bearingDegrees, angleDelta, normalizeDeg } from '../core/geo-utils.ts';
-import { SPAWNS } from '../data/spawns.ts';
+import {
+  distanceMeters,
+  bearingDegrees,
+  angleDelta,
+  normalizeDeg,
+} from "../core/geo-utils.ts";
+import { SPAWNS } from "../data/spawns.ts";
 
 const SMOOTHING = 0.15;
 const VARIANCE_WINDOW_MS = 1500;
@@ -34,7 +39,7 @@ export class Compass {
 
   smoothedHeading: Degrees | null = null;
   rawHeading: Degrees | null = null;
-  headingSource: HeadingSource = 'none';
+  headingSource: HeadingSource = "none";
   absoluteSeen = false;
   headingHistory: Array<{ t: number; h: Degrees }> = [];
   lastHeadingChangeAt = 0;
@@ -48,8 +53,10 @@ export class Compass {
   lastUpdateEmit = 0;
   startedAt = 0;
 
-  private _onAbsolute = (e: DeviceOrientationEvent) => this._handleOrientation(e, true);
-  private _onOrientation = (e: DeviceOrientationEvent) => this._handleOrientation(e, false);
+  private _onAbsolute = (e: DeviceOrientationEvent) =>
+    this._handleOrientation(e, true);
+  private _onOrientation = (e: DeviceOrientationEvent) =>
+    this._handleOrientation(e, false);
   private _onVisibility = () => this._reprimePosition();
 
   /**
@@ -62,28 +69,35 @@ export class Compass {
     // iOS motion permission. Must be in a user-gesture call stack. The
     // lib.dom DeviceOrientationEvent constructor is `var` so we can't
     // redeclare; reach the static method via MotionPermissionCtor.
-    const reqPerm = (DeviceOrientationEvent as unknown as MotionPermissionCtor).requestPermission;
-    if (typeof reqPerm === 'function') {
+    const reqPerm = (DeviceOrientationEvent as unknown as MotionPermissionCtor)
+      .requestPermission;
+    if (typeof reqPerm === "function") {
       try {
         const r = await reqPerm.call(DeviceOrientationEvent);
-        if (r !== 'granted') throw new Error('motion-denied');
+        if (r !== "granted") throw new Error("motion-denied");
       } catch (e) {
-        if (this.onError) this.onError('motion-denied');
+        if (this.onError) this.onError("motion-denied");
         throw e;
       }
     }
 
-    if (!('geolocation' in navigator)) {
-      if (this.onError) this.onError('geolocation-missing');
-      throw new Error('geolocation-missing');
+    if (!("geolocation" in navigator)) {
+      if (this.onError) this.onError("geolocation-missing");
+      throw new Error("geolocation-missing");
     }
 
     // Surface the geolocation prompt with getCurrentPosition (watchPosition
     // alone often delays the prompt until the first sample).
     await new Promise<void>((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(
-        (pos) => { this._setPosition(pos); resolve(); },
-        (err) => { if (this.onError) this.onError('geolocation-denied'); reject(err); },
+        (pos) => {
+          this._setPosition(pos);
+          resolve();
+        },
+        (err) => {
+          if (this.onError) this.onError("geolocation-denied");
+          reject(err);
+        },
         { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 },
       );
     });
@@ -97,10 +111,13 @@ export class Compass {
       { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 },
     );
 
-    window.addEventListener('deviceorientationabsolute' as keyof WindowEventMap,
-      this._onAbsolute as EventListener, true);
-    window.addEventListener('deviceorientation', this._onOrientation, true);
-    document.addEventListener('visibilitychange', this._onVisibility);
+    window.addEventListener(
+      "deviceorientationabsolute" as keyof WindowEventMap,
+      this._onAbsolute as EventListener,
+      true,
+    );
+    window.addEventListener("deviceorientation", this._onOrientation, true);
+    document.addEventListener("visibilitychange", this._onVisibility);
 
     // Smooth at 60Hz; emit callbacks throttled to UPDATE_HZ inside _tick.
     const tick = () => {
@@ -120,10 +137,13 @@ export class Compass {
       cancelAnimationFrame(this.tickId);
       this.tickId = null;
     }
-    window.removeEventListener('deviceorientationabsolute' as keyof WindowEventMap,
-      this._onAbsolute as EventListener, true);
-    window.removeEventListener('deviceorientation', this._onOrientation, true);
-    document.removeEventListener('visibilitychange', this._onVisibility);
+    window.removeEventListener(
+      "deviceorientationabsolute" as keyof WindowEventMap,
+      this._onAbsolute as EventListener,
+      true,
+    );
+    window.removeEventListener("deviceorientation", this._onOrientation, true);
+    document.removeEventListener("visibilitychange", this._onVisibility);
   }
 
   markFound(id: number): void {
@@ -179,8 +199,8 @@ export class Compass {
   private _reprimePosition(): void {
     // iOS may pause watchPosition while the screen is locked. A single
     // getCurrentPosition re-primes without disturbing the existing watch.
-    if (document.visibilityState !== 'visible') return;
-    if (!('geolocation' in navigator)) return;
+    if (document.visibilityState !== "visible") return;
+    if (!("geolocation" in navigator)) return;
     navigator.geolocation.getCurrentPosition(
       (pos) => this._setPosition(pos),
       () => {},
@@ -188,24 +208,31 @@ export class Compass {
     );
   }
 
-  private _handleOrientation(e: DeviceOrientationEvent, isAbsoluteEvent: boolean): void {
+  private _handleOrientation(
+    e: DeviceOrientationEvent,
+    isAbsoluteEvent: boolean,
+  ): void {
     let h: number | null = null;
     let src = this.headingSource;
 
-    if (typeof e.webkitCompassHeading === 'number') {
+    if (typeof e.webkitCompassHeading === "number") {
       h = e.webkitCompassHeading;
-      src = 'ios';
+      src = "ios";
       this.absoluteSeen = true;
-    } else if (isAbsoluteEvent && e.absolute === true && typeof e.alpha === 'number') {
+    } else if (
+      isAbsoluteEvent &&
+      e.absolute === true &&
+      typeof e.alpha === "number"
+    ) {
       // Android absolute: alpha is counter-clockwise from north.
       h = (360 - e.alpha) % 360;
-      src = 'absolute';
+      src = "absolute";
       this.absoluteSeen = true;
-    } else if (!this.absoluteSeen && typeof e.alpha === 'number') {
+    } else if (!this.absoluteSeen && typeof e.alpha === "number") {
       // Relative fallback only after waiting for absolute.
       if (performance.now() - this.startedAt < ABSOLUTE_WAIT_MS) return;
       h = (360 - e.alpha) % 360;
-      src = 'relative';
+      src = "relative";
     } else {
       return;
     }
@@ -216,7 +243,10 @@ export class Compass {
     this.headingSource = src;
 
     // Stuck-sensor detection (heading not changing at all).
-    if (this.lastHeadingValue === -1 || Math.abs(heading - this.lastHeadingValue) > 0.1) {
+    if (
+      this.lastHeadingValue === -1 ||
+      Math.abs(heading - this.lastHeadingValue) > 0.1
+    ) {
       this.lastHeadingChangeAt = performance.now();
       this.lastHeadingValue = heading;
     }
@@ -226,13 +256,18 @@ export class Compass {
       this.smoothedHeading = heading;
     } else {
       const delta = angleDelta(this.smoothedHeading, heading);
-      this.smoothedHeading = normalizeDeg(this.smoothedHeading + delta * SMOOTHING);
+      this.smoothedHeading = normalizeDeg(
+        this.smoothedHeading + delta * SMOOTHING,
+      );
     }
 
     // Variance window for calibration banner + accuracy estimate.
     const now = performance.now();
     this.headingHistory.push({ t: now, h: heading });
-    while (this.headingHistory.length && now - this.headingHistory[0].t > VARIANCE_WINDOW_MS) {
+    while (
+      this.headingHistory.length &&
+      now - this.headingHistory[0].t > VARIANCE_WINDOW_MS
+    ) {
       this.headingHistory.shift();
     }
   }
@@ -248,7 +283,12 @@ export class Compass {
 
     const tgt = this.target;
     if (tgt && this.position) {
-      const d = distanceMeters(this.position.lat, this.position.lng, tgt.lat, tgt.lng);
+      const d = distanceMeters(
+        this.position.lat,
+        this.position.lng,
+        tgt.lat,
+        tgt.lng,
+      );
       const inside = d <= tgt.catchRadius;
       const wasInside = this.insideRadius.has(tgt.id);
       if (inside && !wasInside) {
@@ -271,22 +311,38 @@ export class Compass {
     let bestD = Infinity;
     for (const s of SPAWNS) {
       if (this.found.has(s.id)) continue;
-      const d = distanceMeters(this.position.lat, this.position.lng, s.lat, s.lng);
-      if (d < bestD) { bestD = d; best = s; }
+      const d = distanceMeters(
+        this.position.lat,
+        this.position.lng,
+        s.lat,
+        s.lng,
+      );
+      if (d < bestD) {
+        bestD = d;
+        best = s;
+      }
     }
     return best;
   }
 
   private _distanceToTarget(): Meters | undefined {
     if (!this.position || !this.target) return undefined;
-    return distanceMeters(this.position.lat, this.position.lng, this.target.lat, this.target.lng);
+    return distanceMeters(
+      this.position.lat,
+      this.position.lng,
+      this.target.lat,
+      this.target.lng,
+    );
   }
 
   private _arrowAngle(): Degrees | undefined {
-    if (!this.position || !this.target || this.smoothedHeading === null) return undefined;
+    if (!this.position || !this.target || this.smoothedHeading === null)
+      return undefined;
     const bearing = bearingDegrees(
-      this.position.lat, this.position.lng,
-      this.target.lat, this.target.lng,
+      this.position.lat,
+      this.position.lng,
+      this.target.lat,
+      this.target.lng,
     );
     return normalizeDeg(bearing - this.smoothedHeading);
   }

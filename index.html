@@ -12,105 +12,20 @@
         <!-- styles.css is imported by src/app.ts and bundled by Vite. -->
 
         <!--
-      8th Wall (open source). Engine Binary + XRExtras from CDN — these
-      are runtime singletons and don't bundle cleanly via npm. Three.js
-      and Leaflet are bundled by Vite via the TS imports.
-    -->
+            8th Wall runtime. Files copied from node_modules to public/vendor
+            on `pnpm install` (scripts/sync-vendor.sh). Same-origin — no CDN.
+            The engine self-discovers its chunks (xr-slam.js, resources/)
+            relative to its own URL.
+        -->
         <script
-            src="https://cdn.jsdelivr.net/npm/@8thwall/engine-binary@1/dist/xr.js"
+            src="/vendor/8thwall/xr.js"
             async
-            crossorigin="anonymous"
             data-preload-chunks="slam"
         ></script>
-        <script
-            src="https://cdn.jsdelivr.net/npm/@8thwall/xrextras@1/dist/xrextras.js"
-            crossorigin="anonymous"
-        ></script>
-        <script
-            src="https://cdn.jsdelivr.net/npm/@8thwall/landing-page@1/dist/landing-page.js"
-            crossorigin="anonymous"
-        ></script>
+        <script src="/vendor/8thwall/xrextras.js"></script>
     </head>
     <body>
-        <canvas id="camerafeed"></canvas>
-
-        <!-- Top HUD -->
-        <div id="hud-top" class="hud">
-            <div id="counter" class="counter">0 / 10</div>
-            <div id="target-name" class="target-name"></div>
-
-            <div id="calibration" class="hud-banner">
-                Compass needs calibration — wave your phone in a figure 8.
-            </div>
-            <div id="weak-gps" class="hud-banner hud-banner-warn">
-                Weak GPS signal — move to open sky.
-            </div>
-            <div id="compass-error" class="hud-banner hud-banner-warn">
-                Compass unavailable — using map only.
-            </div>
-        </div>
-
-        <!-- Bottom HUD -->
-        <div id="hud-bottom" class="hud">
-            <div id="compass" class="compass">
-                <div id="arrow" class="arrow"></div>
-            </div>
-            <div id="distance" class="distance">— m</div>
-        </div>
-
-        <!-- Full-screen map overlay (shown automatically when distance >= AR_DISTANCE_M). -->
-        <div id="map-overlay" class="map-overlay">
-            <div id="map"></div>
-            <div
-                id="map-distance"
-                class="map-distance"
-                aria-live="polite"
-            ></div>
-        </div>
-
-        <div id="banner" class="banner"></div>
-        <div id="flash" class="flash"></div>
-
-        <!-- Start screen -->
-        <div id="start" class="overlay overlay-visible">
-            <div class="overlay-content">
-                <h1>Creature Hunt</h1>
-                <p>
-                    Walk to find 10 hidden creatures around you. Tap each one
-                    when it appears in your camera view.
-                </p>
-                <button id="start-button" class="button-primary">
-                    Start hunting
-                </button>
-                <p class="overlay-hint">
-                    Works best outdoors with clear sky. Allow location, motion
-                    and camera.
-                </p>
-            </div>
-        </div>
-
-        <!-- Completion screen -->
-        <div id="completion" class="overlay">
-            <div class="overlay-content">
-                <h1>All creatures found!</h1>
-                <p id="completion-time">Time: 0m 0s</p>
-                <button id="completion-replay" class="button-primary">
-                    Play again
-                </button>
-            </div>
-        </div>
-
-        <!-- Fatal error -->
-        <div id="error" class="overlay">
-            <div class="overlay-content">
-                <h1>Can't continue</h1>
-                <p id="error-message">Something went wrong.</p>
-                <button id="reload-button" class="button-primary">
-                    Reload
-                </button>
-            </div>
-        </div>
-
-        <script type="module" src="/src/app.ts"></script>
+        <div id="root"></div>
+        <script type="module" src="/src/main.tsx"></script>
     </body>
 </html>

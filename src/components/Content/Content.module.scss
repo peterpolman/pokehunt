@@ -1,0 +1,38 @@
+// Pokédex content area — flex 1 1 auto child of .app. Transparent so the
+// full-window XR8 canvas (rendered at the App root) shows through. Side red
+// borders are pseudo-elements pinned left/right; immediate children stretch
+// to fill.
+
+$pdx-red: #d2222a;
+$pdx-side: 14px;
+
+.content {
+    position: relative;
+    flex: 1 1 auto;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+
+    &::before,
+    &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: $pdx-side;
+        background: $pdx-red;
+        z-index: 50;
+        pointer-events: none;
+    }
+    &::before {
+        left: 0;
+    }
+    &::after {
+        right: 0;
+    }
+
+    > * {
+        position: absolute;
+        inset: 0;
+    }
+}

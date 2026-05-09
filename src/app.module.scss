@@ -1,0 +1,56 @@
+@import url("https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap");
+
+:global {
+    :root {
+        --bg: #0b0f17;
+        --fg: #ffffff;
+        --accent: #ef4444;
+        --shadow-text: 0 2px 4px rgba(0, 0, 0, 0.9);
+        --pdx-red: #d2222a;
+        --pdx-ink: #0d0d0d;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--bg);
+        color: var(--fg);
+        font-family:
+            "Silkscreen", ui-monospace, SFMono-Regular, Menlo, Consolas,
+            monospace;
+        font-size: 10px;
+        font-weight: 400;
+        letter-spacing: 0.02em;
+        -webkit-tap-highlight-color: transparent;
+        overflow: hidden;
+        touch-action: none;
+    }
+}
+
+.app {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    color: var(--fg);
+    /* Transparent — Header + Footer + .content side borders provide the red
+       chrome. The XR8 camera canvas sits behind everything at the root and
+       shows through the (transparent) .content area. */
+    background: transparent;
+}
+
+.canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    display: block;
+}

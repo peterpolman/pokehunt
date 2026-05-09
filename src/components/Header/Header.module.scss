@@ -1,0 +1,71 @@
+// Pokédex header. Red bar with the blue lens, status dots, and counter.
+//
+// Tokens are kept local rather than importing from a shared file — the
+// header is a self-contained "skin" for that part of the UI.
+
+$pdx-red: #d2222a;
+$pdx-ink: #0d0d0d;
+$pdx-blue: #2c8df0;
+
+.header {
+    flex: 0 0 80px;
+    background: $pdx-red;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-bottom: 4px solid $pdx-ink;
+}
+
+.circle {
+    position: relative;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: $pdx-blue;
+    border: 4px solid #ffffff;
+    box-shadow: 0 0 0 2px $pdx-ink;
+    flex-shrink: 0;
+}
+
+.circleShine {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.55);
+}
+
+.dots {
+    display: flex;
+    gap: 6px;
+
+    span {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.75);
+
+        &:nth-child(1) {
+            background: #ff4d4d;
+        }
+        &:nth-child(2) {
+            background: #ffd23a;
+        }
+        &:nth-child(3) {
+            background: #34c759;
+        }
+    }
+}
+
+.counter {
+    margin-left: auto;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 18px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 0.08em;
+    text-shadow: 0 1px 0 $pdx-ink;
+}

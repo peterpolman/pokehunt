@@ -7,6 +7,16 @@
 declare const XR8: any;
 declare const XRExtras: any;
 
+// CSS / SCSS modules — Vite runtime maps imports to a class-name object.
+declare module '*.module.scss' {
+  const classes: { readonly [key: string]: string };
+  export default classes;
+}
+declare module '*.module.css' {
+  const classes: { readonly [key: string]: string };
+  export default classes;
+}
+
 // Augment lib.dom.d.ts to expose iOS-only fields on DeviceOrientationEvent.
 // Top-level `interface` declarations merge with the existing global one.
 interface DeviceOrientationEvent {

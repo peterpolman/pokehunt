@@ -16,3 +16,4 @@ serve.json
 dist
 .vite
 scripts/.venv
+public/vendor
