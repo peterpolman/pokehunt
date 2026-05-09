@@ -49,6 +49,11 @@ export class Compass {
   target: Spawn | null = null;
   insideRadius = new Set<number>();
 
+  // AR overrides GPS-derived distance once the model is SLAM-anchored.
+  // GPS jitter at close range gives stale readings; SLAM-derived camera
+  // movement gives a smooth "warmer/colder" cue.
+  distanceOverride: { id: number; d: Meters } | null = null;
+
   watchId: number | null = null;
   tickId: number | null = null;
   lastUpdateEmit = 0;
@@ -328,8 +333,17 @@ export class Compass {
     return best;
   }
 
+  setDistanceOverride(id: number | null, d: Meters | null): void {
+    if (id === null || d === null) this.distanceOverride = null;
+    else this.distanceOverride = { id, d };
+  }
+
   private _distanceToTarget(): Meters | undefined {
-    if (!this.position || !this.target) return undefined;
+    if (!this.target) return undefined;
+    if (this.distanceOverride && this.distanceOverride.id === this.target.id) {
+      return this.distanceOverride.d;
+    }
+    if (!this.position) return undefined;
     return distanceMeters(
       this.position.lat,
       this.position.lng,

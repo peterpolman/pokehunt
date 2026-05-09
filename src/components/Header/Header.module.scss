@@ -15,6 +15,9 @@ $pdx-blue: #2c8df0;
     align-items: center;
     gap: 14px;
     border-bottom: 4px solid $pdx-ink;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .circle {

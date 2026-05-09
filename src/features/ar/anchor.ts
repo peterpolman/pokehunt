@@ -29,13 +29,21 @@ export async function syncCurrentModel(compass: Compass): Promise<void> {
   const cs = compass.state();
   const tgt = cs.target;
 
+  // Use raw GPS distance for engine-side decisions (anchor/render) so the
+  // SLAM-derived display override never feeds back into anchoring.
+  const gpsDist =
+    cs.position && tgt
+      ? (distanceMeters(cs.position.lat, cs.position.lng, tgt.lat, tgt.lng) as Meters)
+      : undefined;
+
   if (
     !tgt ||
-    cs.distance === undefined ||
-    cs.distance > RENDER_DISTANCE ||
+    gpsDist === undefined ||
+    gpsDist > RENDER_DISTANCE ||
     cs.arrowAngle === undefined
   ) {
     if (s.currentModel) resetCurrentModel();
+    compass.setDistanceOverride(null, null);
     return;
   }
 
@@ -67,7 +75,7 @@ export async function syncCurrentModel(compass: Compass): Promise<void> {
   if (!s.currentModel) return;
 
   let needsAnchor = s.anchoredForId !== tgt.id;
-  const slamLocked = cs.distance < SLAM_LOCK_M;
+  const slamLocked = gpsDist < SLAM_LOCK_M;
   if (!needsAnchor && !slamLocked && cs.position && s.anchoredAtGps) {
     const moved = distanceMeters(
       cs.position.lat, cs.position.lng,
@@ -77,7 +85,7 @@ export async function syncCurrentModel(compass: Compass): Promise<void> {
   }
 
   if (needsAnchor) {
-    const world = localPos(cs.arrowAngle, cs.distance);
+    const world = localPos(cs.arrowAngle, gpsDist);
     s.camera.localToWorld(world);
     // Snap to ground. SLAM world ground sits at y=0 because we seeded the
     // camera at (0, 1.6, 0) in xr.ts onStart. Without this the model floats
@@ -96,6 +104,18 @@ export async function syncCurrentModel(compass: Compass): Promise<void> {
     s.anchoredAtGps = cs.position ? { lat: cs.position.lat, lng: cs.position.lng } : null;
     s.anchoredWorldPos = world.clone();
     s.anchorCount++;
+  }
+
+  // Live SLAM-derived distance: camera world pos -> anchored model (XZ).
+  // Walking toward the anchor shrinks this even when GPS is jittery.
+  if (s.anchoredForId === tgt.id && s.anchoredWorldPos) {
+    const cp = new THREE.Vector3();
+    s.camera.getWorldPosition(cp);
+    const dx = cp.x - s.anchoredWorldPos.x;
+    const dz = cp.z - s.anchoredWorldPos.z;
+    compass.setDistanceOverride(tgt.id, Math.hypot(dx, dz) as Meters);
+  } else {
+    compass.setDistanceOverride(null, null);
   }
 }
 

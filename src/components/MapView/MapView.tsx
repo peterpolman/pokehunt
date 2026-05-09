@@ -88,7 +88,8 @@ export function MapView({
         existing.circle.setLatLng([spawn.lat, spawn.lng]);
         continue;
       }
-      const html = `<img class="${s.spawnSprite}" src="${spawn.image}" alt="${spawn.name}" />`;
+      const dim = found.has(spawn.id) ? "opacity:0.55;" : "";
+      const html = `<img class="${s.spawnSprite}" style="${dim}" src="${spawn.image}" alt="${spawn.name}" />`;
       const icon = L.divIcon({
         className: s.spawnIcon,
         html,
@@ -178,8 +179,8 @@ export function MapView({
     }
 
     for (const [id, { marker }] of spawnMarkersRef.current) {
-      const el = marker.getElement();
-      if (el) el.style.opacity = found.has(id) ? "0.35" : "1";
+      const img = marker.getElement()?.querySelector("img");
+      if (img) img.style.opacity = found.has(id) ? "0.55" : "1";
     }
   }, [state, found]);
 
