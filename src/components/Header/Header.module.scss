@@ -69,3 +69,21 @@ $pdx-blue: #2c8df0;
     letter-spacing: 0.08em;
     text-shadow: 0 1px 0 $pdx-ink;
 }
+
+.action {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.25);
+    border: 2px solid $pdx-ink;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    text-shadow: 0 1px 0 $pdx-ink;
+
+    &:active {
+        transform: translateY(1px);
+    }
+}

@@ -6,28 +6,53 @@
 import { useEffect, useRef } from "react";
 import L, { type Map as LMap, type Marker, type Circle } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { SPAWNS } from "../../data/spawns.ts";
 import s from "./MapView.module.scss";
 
 interface Props {
   state: CompassState;
+  spawns: Spawn[];
   found: Set<number>;
   visible: boolean;
+  onMapClick?: (latlng: { lat: number; lng: number }) => void;
+  /** When set with `markerActionLabel`, marker click opens a Leaflet popup
+   *  whose button invokes this with the spawn id. */
+  onMarkerAction?: (spawnId: number) => void;
+  markerActionLabel?: string;
+  markersInteractive?: boolean;
 }
 
-export function MapView({ state, found, visible }: Props) {
+const FALLBACK_CENTER: [number, number] = [52.367, 4.844];
+
+export function MapView({
+  state,
+  spawns,
+  found,
+  visible,
+  onMapClick,
+  onMarkerAction,
+  markerActionLabel,
+  markersInteractive,
+}: Props) {
   const mapEl = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LMap | null>(null);
   const userMarkerRef = useRef<Marker | null>(null);
   const accuracyCircleRef = useRef<Circle | null>(null);
-  const spawnMarkersRef = useRef<Map<number, Marker>>(new Map());
+  const spawnMarkersRef = useRef<Map<number, { marker: Marker; circle: Circle }>>(
+    new Map(),
+  );
+  const onMapClickRef = useRef(onMapClick);
+  const onMarkerActionRef = useRef(onMarkerAction);
+  onMapClickRef.current = onMapClick;
+  onMarkerActionRef.current = onMarkerAction;
 
   // Build map once.
   useEffect(() => {
     if (!mapEl.current || mapRef.current) return;
     const center: [number, number] = state.position
       ? [state.position.lat, state.position.lng]
-      : [SPAWNS[0].lat, SPAWNS[0].lng];
+      : spawns.length > 0
+        ? [spawns[0].lat, spawns[0].lng]
+        : FALLBACK_CENTER;
 
     const map = L.map(mapEl.current, { zoomControl: true }).setView(center, 18);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -35,7 +60,34 @@ export function MapView({ state, found, visible }: Props) {
       attribution: "© OpenStreetMap",
     }).addTo(map);
 
-    for (const spawn of SPAWNS) {
+    map.on("click", (e: L.LeafletMouseEvent) => {
+      onMapClickRef.current?.({ lat: e.latlng.lat, lng: e.latlng.lng });
+    });
+
+    mapRef.current = map;
+  }, []);
+
+  // Sync spawn markers with the spawns prop. Cheap to rebuild — at most 22.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const next = new Set(spawns.map((sp) => sp.id));
+    for (const [id, { marker, circle }] of spawnMarkersRef.current) {
+      if (!next.has(id)) {
+        map.removeLayer(marker);
+        map.removeLayer(circle);
+        spawnMarkersRef.current.delete(id);
+      }
+    }
+
+    for (const spawn of spawns) {
+      const existing = spawnMarkersRef.current.get(spawn.id);
+      if (existing) {
+        existing.marker.setLatLng([spawn.lat, spawn.lng]);
+        existing.circle.setLatLng([spawn.lat, spawn.lng]);
+        continue;
+      }
       const html = `<img class="${s.spawnSprite}" src="${spawn.image}" alt="${spawn.name}" />`;
       const icon = L.divIcon({
         className: s.spawnIcon,
@@ -45,9 +97,22 @@ export function MapView({ state, found, visible }: Props) {
       });
       const marker = L.marker([spawn.lat, spawn.lng], {
         icon,
-        interactive: false,
+        interactive: !!markersInteractive,
       }).addTo(map);
-      L.circle([spawn.lat, spawn.lng], {
+      if (markersInteractive && markerActionLabel) {
+        const btn = document.createElement("button");
+        btn.textContent = markerActionLabel;
+        btn.className = s.popupAction;
+        btn.addEventListener("click", () => {
+          marker.closePopup();
+          onMarkerActionRef.current?.(spawn.id);
+        });
+        marker.bindPopup(btn, { closeButton: false, offset: [0, -16] });
+        marker.on("click", (e) => {
+          L.DomEvent.stopPropagation(e);
+        });
+      }
+      const circle = L.circle([spawn.lat, spawn.lng], {
         radius: spawn.catchRadius,
         color: "#3b82f6",
         weight: 1,
@@ -55,10 +120,9 @@ export function MapView({ state, found, visible }: Props) {
         fillOpacity: 0.08,
         interactive: false,
       }).addTo(map);
-      spawnMarkersRef.current.set(spawn.id, marker);
+      spawnMarkersRef.current.set(spawn.id, { marker, circle });
     }
-    mapRef.current = map;
-  }, []);
+  }, [spawns, markersInteractive, markerActionLabel]);
 
   // Recompute size when the overlay flips visible — Leaflet caches the
   // container size on init and shows tiles wrong after a display: none.
@@ -113,11 +177,9 @@ export function MapView({ state, found, visible }: Props) {
       }
     }
 
-    for (const spawn of SPAWNS) {
-      const m = spawnMarkersRef.current.get(spawn.id);
-      if (!m) continue;
-      const el = m.getElement();
-      if (el) el.style.opacity = found.has(spawn.id) ? "0.35" : "1";
+    for (const [id, { marker }] of spawnMarkersRef.current) {
+      const el = marker.getElement();
+      if (el) el.style.opacity = found.has(id) ? "0.35" : "1";
     }
   }, [state, found]);
 

@@ -2,6 +2,7 @@
 // flash / error / completion UI state. Wires the XR8 pipeline + canvas tap.
 
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import * as THREE from "three";
 import { Compass } from "../adapters/compass.ts";
 import { bootXR } from "../adapters/xr.ts";
@@ -12,8 +13,10 @@ import { Footer } from "../components/Footer";
 import { Content } from "../components/Content";
 import { StartView } from "../components/StartView";
 import { CompletionView } from "../components/CompletionView";
+import { EmptyHunt } from "../components/EmptyHunt";
 import { Hud } from "../components/Hud";
 import { MapView } from "../components/MapView";
+import { SPAWNS } from "../data/spawns.ts";
 import s from "../app.module.scss";
 
 const AR_DISTANCE_M = 20;
@@ -24,6 +27,7 @@ const AR_DISTANCE_M = 20;
 type Phase = "start" | "running" | "completed";
 
 export function Pokedex() {
+  const navigate = useNavigate();
   const compassRef = useRef<Compass | null>(null);
   if (!compassRef.current) compassRef.current = new Compass();
   const compass = compassRef.current;
@@ -104,19 +108,24 @@ export function Pokedex() {
     compassState.distance === undefined ||
     compassState.distance >= AR_DISTANCE_M;
   const arRunning = phase === "running" || phase === "completed";
+  const hasHunt = SPAWNS.length > 0;
 
   return (
     <div className={s.app}>
       <Header
         foundCount={arRunning ? compassState.foundCount : undefined}
         total={arRunning ? compassState.total : undefined}
+        onLensLongPress={() => navigate("/admin")}
       />
       <Content>
-        {arRunning && (
+        {!hasHunt && <EmptyHunt />}
+
+        {hasHunt && arRunning && (
           <>
             <canvas id="camerafeed" ref={canvasRef} className={s.canvas} />
             <MapView
               state={compassState}
+              spawns={SPAWNS}
               found={compass.found}
               visible={showMap}
               key={foundTick}
@@ -125,9 +134,9 @@ export function Pokedex() {
           </>
         )}
 
-        {phase === "start" && <StartView onStart={onStart} />}
+        {hasHunt && phase === "start" && <StartView onStart={onStart} />}
 
-        {phase === "completed" && (
+        {hasHunt && phase === "completed" && (
           <CompletionView elapsedMs={elapsedMs} onReplay={onReplay} />
         )}
       </Content>

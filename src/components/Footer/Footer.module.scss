@@ -50,6 +50,23 @@ $crt-dim: #2da349;
     font-size: 20px;
 }
 
+.resetButton {
+    font-family: inherit;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    color: $crt-fg;
+    background: transparent;
+    border: 1px solid $crt-dim;
+    border-radius: 3px;
+    padding: 4px 10px;
+    cursor: pointer;
+    text-shadow: inherit;
+
+    &:active {
+        transform: translateY(1px);
+    }
+}
+
 .ticker {
     margin-top: 1rem;
     font-size: 12px;

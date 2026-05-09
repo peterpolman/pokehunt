@@ -84,3 +84,20 @@
     font-weight: 600;
     margin: 8px 12px;
 }
+
+.popupAction {
+    font-family: "Silkscreen", monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    padding: 6px 12px;
+    background: #d2222a;
+    color: #ffffff;
+    border: 2px solid #0d0d0d;
+    border-radius: 4px;
+    cursor: pointer;
+    text-shadow: 0 1px 0 #0d0d0d;
+
+    &:active {
+        transform: translateY(1px);
+    }
+}
