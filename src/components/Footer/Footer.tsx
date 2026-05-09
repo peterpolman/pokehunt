@@ -26,11 +26,11 @@ export function Footer({ state, notification }: Props) {
     <footer className={s.footer}>
       <div className={s.screen}>
         <div className={s.row}>
-          <span className={s.label}>POKEMON:</span>
+          <span className={s.label}>POKÉ:</span>
           <span className={s.value}>{targetLabel}</span>
         </div>
         <div className={`${s.row} ${s.distance}`}>
-          <span className={s.label}>AFSTAND:</span>
+          <span className={s.label}>AFST:</span>
           <span className={s.value}>{distLabel}</span>
         </div>
         <div className={s.ticker}>

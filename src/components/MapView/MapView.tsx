@@ -122,7 +122,7 @@ export function MapView({ state, found, visible }: Props) {
   }, [state, found]);
 
   return (
-    <div className={`${s.overlay} {visible ? " " + s.open : ""}`}>
+    <div className={`${s.overlay}${visible ? " " + s.open : ""}`}>
       <div ref={mapEl} className={s.map} />
     </div>
   );
