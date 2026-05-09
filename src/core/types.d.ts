@@ -48,6 +48,8 @@ interface UserPosition {
 interface Spawn {
   id: number;
   name: string;
+  /** National Pokédex number. */
+  dex: number;
   lat: number;
   lng: number;
   altitude: Meters;

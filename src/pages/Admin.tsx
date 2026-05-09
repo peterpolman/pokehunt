@@ -16,6 +16,7 @@ import {
   savePlaced,
   type Placed,
 } from "../data/placed.ts";
+import { clearFound } from "../data/found.ts";
 import s from "../app.module.scss";
 
 const ROSTER_BY_ID = new Map(ROSTER.map((r) => [r.id, r]));
@@ -28,6 +29,7 @@ function buildSpawns(placed: Placed[]): Spawn[] {
       {
         id: r.id,
         name: r.name,
+        dex: r.dex,
         lat: p.lat,
         lng: p.lng,
         altitude: 0 as Meters,
@@ -107,6 +109,7 @@ export function Admin() {
 
   const onResetConfirm = () => {
     clearPlaced();
+    clearFound();
     setPlaced([]);
     setResetOpen(false);
     setNotification("Alles gewist");

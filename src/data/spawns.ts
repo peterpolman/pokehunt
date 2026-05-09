@@ -70,6 +70,7 @@ export const SPAWNS: Spawn[] = loadPlaced()
     return {
       id: r.id,
       name: r.name,
+      dex: r.dex,
       lat: p.lat,
       lng: p.lng,
       altitude: 0 as Meters,

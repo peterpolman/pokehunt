@@ -51,3 +51,21 @@
     height: 100%;
     z-index: 1;
 }
+
+.flash {
+    position: absolute;
+    inset: 0;
+    background: #ffffff;
+    pointer-events: none;
+    z-index: 60;
+    animation: flashFade 150ms ease-out forwards;
+}
+
+@keyframes flashFade {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}

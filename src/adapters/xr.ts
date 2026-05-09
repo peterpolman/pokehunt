@@ -57,6 +57,12 @@ export function bootXR(
     return;
   }
   const xr = XR8 as any;
+  // Pre-acquire a WebGL context with preserveDrawingBuffer so we can read
+  // pixels off the canvas after each frame (camera-button photo capture).
+  // Subsequent getContext() calls return this same context regardless of
+  // the attributes the engine passes in.
+  canvas.getContext("webgl2", { preserveDrawingBuffer: true }) ??
+    canvas.getContext("webgl", { preserveDrawingBuffer: true });
   // FullWindowCanvas is what binds the engine session to the canvas;
   // without it XR8.run fails with "No valid session manager".
   xr.addCameraPipelineModules([

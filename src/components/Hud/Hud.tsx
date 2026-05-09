@@ -1,16 +1,18 @@
-// AR-only overlays inside the content area: compass arrow + warning banners.
-// Counter / target name / distance live in the Header + Footer.
+// AR-only overlays inside the content area: compass arrow + warning banners
+// + camera shutter. Counter / target name / distance live in Header + Footer.
 
 import { VARIANCE_THRESHOLD_HIGH, VARIANCE_THRESHOLD_LOW } from '../../adapters/compass.ts';
+import { Shutter } from '../Shutter';
 import s from './Hud.module.scss';
 
 interface Props {
   state: CompassState;
   /** Visible only when AR (camera) view is active. */
   visible: boolean;
+  onShutter?: () => void;
 }
 
-export function Hud({ state: cs, visible }: Props) {
+export function Hud({ state: cs, visible, onShutter }: Props) {
   if (!visible) return null;
 
   const d = cs.distance;
@@ -57,6 +59,10 @@ export function Hud({ state: cs, visible }: Props) {
           }
         />
       </div>
+
+      {onShutter && (
+        <Shutter enabled={insideCatch} onShutter={onShutter} />
+      )}
     </div>
   );
 }

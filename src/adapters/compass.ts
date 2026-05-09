@@ -17,6 +17,7 @@ import {
   normalizeDeg,
 } from "../core/geo-utils.ts";
 import { SPAWNS } from "../data/spawns.ts";
+import { clearFound, loadFound, saveFound } from "../data/found.ts";
 
 const SMOOTHING = 0.15;
 const VARIANCE_WINDOW_MS = 1500;
@@ -28,7 +29,7 @@ const WEAK_GPS_M = 20;
 const UPDATE_HZ = 15;
 
 export class Compass {
-  found = new Set<number>();
+  found: Set<number> = new Set(loadFound());
 
   onUpdate: ((s: CompassState) => void) | null = null;
   onEnterRadius: ((s: Spawn, d: Meters) => void) | null = null;
@@ -150,6 +151,7 @@ export class Compass {
     this.found.add(id);
     this.insideRadius.delete(id);
     this.target = this._pickTarget();
+    saveFound([...this.found]);
     // Force an immediate emit so UI updates without waiting for the next tick.
     this.lastUpdateEmit = 0;
   }
@@ -175,6 +177,7 @@ export class Compass {
   reset(): void {
     this.found.clear();
     this.insideRadius.clear();
+    clearFound();
     this.target = this._pickTarget();
     this.startedAt = performance.now();
     this.lastUpdateEmit = 0;

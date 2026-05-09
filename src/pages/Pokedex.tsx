@@ -1,12 +1,13 @@
 // Pokedex page. Owns: compass instance, view-mode state, banner /
-// flash / error / completion UI state. Wires the XR8 pipeline + canvas tap.
+// flash / error / completion UI state. Wires the XR8 pipeline + camera shutter.
 
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as THREE from "three";
 import { Compass } from "../adapters/compass.ts";
 import { bootXR } from "../adapters/xr.ts";
-import { attachCanvasTap } from "../features/catch.ts";
+import { catchCurrent } from "../features/catch.ts";
+import { capturePhoto } from "../features/photo.ts";
 import { useCompassState } from "../hooks/useCompass.ts";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
@@ -34,6 +35,7 @@ export function Pokedex() {
 
   const [phase, setPhase] = useState<Phase>("start");
   const [notification, setNotification] = useState("");
+  const [flashing, setFlashing] = useState(false);
 
   const [foundTick, setFoundTick] = useState(0);
   const [elapsedMs, setElapsedMs] = useState(0);
@@ -85,9 +87,21 @@ export function Pokedex() {
       });
   };
 
-  useEffect(() => {
-    if (phase !== "running" || !canvasRef.current) return;
-    const off = attachCanvasTap(canvasRef.current, compass, {
+  const onShutter = async () => {
+    const target = compass.state().target;
+    const canvas = canvasRef.current;
+    if (!target || !canvas) return;
+    if (typeof navigator.vibrate === "function") navigator.vibrate(20);
+    setFlashing(true);
+    window.setTimeout(() => setFlashing(false), 150);
+    try {
+      await capturePhoto(canvas, target);
+    } catch (e) {
+      console.warn("[hunt] capture failed", e);
+      showNotification("Foto mislukt — probeer opnieuw");
+      return;
+    }
+    catchCurrent(compass, {
       onBanner: showNotification,
       onComplete: (ms) => {
         setElapsedMs(ms);
@@ -95,8 +109,7 @@ export function Pokedex() {
       },
       onCaught: () => setFoundTick((n) => n + 1),
     });
-    return off;
-  }, [phase, compass]);
+  };
 
   const onReplay = () => {
     compass.reset();
@@ -130,7 +143,12 @@ export function Pokedex() {
               visible={showMap}
               key={foundTick}
             />
-            <Hud state={compassState} visible={!showMap} />
+            <Hud
+              state={compassState}
+              visible={!showMap}
+              onShutter={onShutter}
+            />
+            {flashing && <div className={s.flash} />}
           </>
         )}
 
