@@ -13,6 +13,7 @@ type Props =
       placedCount: number;
       total: number;
       onDone: () => void;
+      onReset: () => void;
     };
 
 export function Header(props: Props) {
@@ -32,11 +33,11 @@ export function Header(props: Props) {
       </div>
       {props.mode === "admin" ? (
         <>
-          <div className={s.counter}>
-            ADMIN · {props.placedCount}/{props.total}
-          </div>
+          <button className={s.action} onClick={props.onReset}>
+            RESET
+          </button>
           <button className={s.action} onClick={props.onDone}>
-            KLAAR →
+            KLAAR
           </button>
         </>
       ) : (

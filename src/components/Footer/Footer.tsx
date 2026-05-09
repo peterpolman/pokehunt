@@ -11,7 +11,6 @@ type Props =
       mode: "admin";
       placedCount: number;
       total: number;
-      onReset: () => void;
       notification?: string;
     };
 
@@ -36,11 +35,6 @@ export function Footer(props: Props) {
               <span className={s.value}>
                 {props.placedCount} / {props.total}
               </span>
-            </div>
-            <div className={`${s.row} ${s.distance}`}>
-              <button className={s.resetButton} onClick={props.onReset}>
-                RESET ALLES
-              </button>
             </div>
           </>
         ) : (

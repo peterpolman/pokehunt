@@ -136,6 +136,7 @@ export function Admin() {
         placedCount={placed.length}
         total={ROSTER.length}
         onDone={onDone}
+        onReset={() => setResetOpen(true)}
       />
       <Content>
         <MapView
@@ -153,7 +154,6 @@ export function Admin() {
         mode="admin"
         placedCount={placed.length}
         total={ROSTER.length}
-        onReset={() => setResetOpen(true)}
         notification={notification}
       />
 
