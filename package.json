@@ -9,13 +9,16 @@
     "dev": "vite --host",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --port 3000",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "convert-models": "bash scripts/convert-models.sh",
+    "fetch-sprites": "bash scripts/fetch-sprites.sh"
   },
   "dependencies": {
     "leaflet": "^1.9.4",
     "three": "^0.183.0"
   },
   "devDependencies": {
+    "@robertlong/fbx2gltf": "^0.11.0",
     "@types/leaflet": "^1.9.0",
     "@types/node": "^25.6.0",
     "@types/three": "^0.183.0",

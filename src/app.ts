@@ -4,7 +4,6 @@
 import * as THREE from 'three';
 import '../styles.css';
 import { Compass } from './adapters/compass.ts';
-import { generateRingAround } from './data/spawns.ts';
 import { showBanner, vibrateProximity, playSound } from './adapters/ux.ts';
 import { attachMap } from './adapters/map.ts';
 import { $, showFatal } from './adapters/dom.ts';
@@ -15,12 +14,6 @@ import { onCanvasTap, hideCompletion } from './features/catch.ts';
 
 // 8th Wall reads window.THREE on init.
 (window as any).THREE = THREE;
-
-const params = new URLSearchParams(location.search);
-// `?here=1` uses the GPS coords from data/spawns.ts. Without it, a fresh
-// ring is generated around the user's current position so the hunt is
-// testable anywhere.
-const USE_GPS_SPAWNS = params.get('here') === '1';
 
 
 const compass = new Compass();
@@ -52,11 +45,6 @@ function onStartTap(): void {
   compass
     .start()
     .then(() => {
-      if (!USE_GPS_SPAWNS && compass.position) {
-        generateRingAround(compass.position.lat, compass.position.lng);
-        compass.target = null;
-        showBanner('Creatures placed around you', 2000);
-      }
       wireCompass();
       bootXR(compass);
     })

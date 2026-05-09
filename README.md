@@ -72,13 +72,6 @@ ngrok http https://localhost:3000
 The app's secure-context check blocks startup with a clear error if the cert
 is untrusted.
 
-## URL parameters
-
-| Param     | Behaviour |
-|----------:|-----------|
-| `?here=1` | Use the real GPS coords from `src/data/spawns.ts`. |
-| *(none)*  | After your first GPS fix, drop the 21 spawns in a ring around you for indoor / away-from-site testing. |
-
 ## Spawns + assets
 
 - Coordinates and per-spawn config: `src/data/spawns.ts`. Pairwise distance

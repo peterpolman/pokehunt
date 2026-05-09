@@ -27,7 +27,7 @@ const SEEDS: SpawnSeed[] = [
   {
     id: 4,
     name: "Mr. Mime",
-    key: "mrmime",
+    key: "mr-mime",
     lat: 52.366394,
     lng: 4.843385,
     scale: 1.1,
@@ -88,6 +88,13 @@ const SEEDS: SpawnSeed[] = [
   },
   { id: 20, name: "Rapidash", key: "rapidash", lat: 52.367472, lng: 4.84162 },
   { id: 21, name: "Wailord", key: "wailord", lat: 52.366394, lng: 4.84162 },
+  {
+    id: 22,
+    name: "Charizard",
+    key: "charizard",
+    lat: 52.01347841182597,
+    lng: 5.743685151685765,
+  },
 ];
 
 export const SPAWNS: Spawn[] = SEEDS.map((s) => ({
@@ -101,25 +108,3 @@ export const SPAWNS: Spawn[] = SEEDS.map((s) => ({
   scale: s.scale ?? 1.0,
   catchRadius: (s.catchRadius ?? 10) as Meters,
 }));
-
-/**
- * Replace each spawn's lat/lng with positions on rings around the user's
- * current GPS. Inner spawn at 25m for immediate AR testing; remaining
- * spawns at 60m+ so pairwise distance stays > 50m.
- */
-export function generateRingAround(centerLat: number, centerLng: number): void {
-  const cosLat = Math.cos((centerLat * Math.PI) / 180);
-  for (let i = 0; i < SPAWNS.length; i++) {
-    const isInner = i === 0;
-    const ringIdx = Math.floor((i - 1) / 8);
-    const inRing = (i - 1) % 8;
-    const dist = isInner ? 25 : 60 + ringIdx * 60;
-    const angle = isInner
-      ? 0
-      : ((inRing + 0.5) / 8) * Math.PI * 2 + (Math.random() - 0.5) * 0.2;
-    const dn = Math.cos(angle) * dist;
-    const de = Math.sin(angle) * dist;
-    SPAWNS[i].lat = centerLat + dn / 111320;
-    SPAWNS[i].lng = centerLng + de / (111320 * cosLat);
-  }
-}
