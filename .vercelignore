@@ -1,0 +1,15 @@
+node_modules
+public/models/downloads
+models-downloads
+*.pem
+keys/
+certs/
+.playwright-mcp
+.DS_Store
+*.log
+.env
+.env.*
+.vscode
+.idea
+serve.json
+dist

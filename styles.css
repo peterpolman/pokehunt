@@ -1,0 +1,474 @@
+/* Outdoor-readable UI: brutal contrast, big type, no translucent overlays
+   over the camera feed (translucency disappears in sunlight).
+   Accent colour #ef4444 is reserved for "you can catch this NOW". */
+
+:root {
+    --bg: #0b0f17;
+    --fg: #ffffff;
+    --accent: #ef4444;
+    --warn: #facc15;
+    --ok: #22c55e;
+    --shadow-text: 0 2px 4px rgba(0, 0, 0, 0.9);
+    --bg-banner: rgba(11, 15, 23, 0.94);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    color: var(--fg);
+    font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    -webkit-tap-highlight-color: transparent;
+    overflow: hidden;
+    touch-action: none;
+}
+
+.hud,
+.overlay,
+.banner,
+.flash {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#camerafeed {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: 0;
+    /* The pointer-events stay on so taps can be raycast against the scene. */
+}
+
+/* -------- HUD -------- */
+
+.hud {
+    position: fixed;
+    left: 0;
+    right: 0;
+    z-index: 5;
+    pointer-events: none;
+    padding: max(env(safe-area-inset-top), 16px) 16px 16px;
+}
+
+#hud-top {
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+#hud-bottom {
+    bottom: 0;
+    padding-bottom: max(env(safe-area-inset-bottom), 24px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.counter {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-shadow: var(--shadow-text);
+}
+
+.target-name {
+    font-size: 18px;
+    font-weight: 700;
+    text-shadow: var(--shadow-text);
+}
+
+.distance {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-shadow: var(--shadow-text);
+    transition:
+        color 0.2s ease,
+        font-size 0.2s ease;
+}
+
+.distance.dist-mid {
+    font-size: 36px;
+}
+.distance.dist-near {
+    font-size: 40px;
+}
+.distance.dist-catch {
+    font-size: 44px;
+    color: var(--accent);
+}
+
+/* -------- Compass -------- */
+
+.compass {
+    position: relative;
+    width: 96px;
+    height: 96px;
+    border-radius: 999px;
+    border: 4px solid #ffffff;
+    background: rgba(11, 15, 23, 0.55);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+}
+
+.compass.pulse-soft {
+    animation: pulse-soft 1.2s ease-in-out infinite;
+}
+.compass.pulse-strong {
+    animation: pulse-strong 0.9s ease-in-out infinite;
+}
+.compass.in-radius {
+    border-color: var(--accent);
+}
+
+@keyframes pulse-soft {
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 0 14px rgba(255, 255, 255, 0);
+    }
+}
+@keyframes pulse-strong {
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 0 22px rgba(239, 68, 68, 0);
+    }
+}
+
+.arrow {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 0;
+    height: 0;
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-bottom: 38px solid #ffffff;
+    transform-origin: 50% 70%;
+    transition: transform 0.1s linear;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.9));
+    /* Center the triangle around the compass centre via translate. */
+    top: 50%;
+    left: 50%;
+    margin: -27px 0 0 -16px;
+}
+
+.arrow-hidden {
+    display: none;
+}
+
+.in-radius .arrow {
+    border-bottom-color: var(--accent);
+}
+
+/* -------- HUD banners (calibration / weak GPS / compass error) -------- */
+
+.hud-banner {
+    pointer-events: none;
+    display: none;
+    background: var(--bg-banner);
+    color: var(--fg);
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: center;
+    max-width: min(92vw, 520px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+    text-shadow: var(--shadow-text);
+}
+
+.hud-banner-warn {
+    background: #b45309; /* solid amber, not translucent */
+    color: #ffffff;
+}
+
+.hud-banner-visible {
+    display: block;
+}
+
+/* -------- Slide-down banner -------- */
+
+.banner {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -120%);
+    z-index: 20;
+    margin-top: max(env(safe-area-inset-top), 12px);
+    background: var(--bg-banner);
+    color: var(--fg);
+    padding: 14px 22px;
+    border-radius: 999px;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+    transition: transform 0.25s ease;
+    text-shadow: var(--shadow-text);
+    white-space: nowrap;
+    max-width: 92vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.banner-visible {
+    transform: translate(-50%, 0);
+}
+
+/* -------- Catch flash -------- */
+
+.flash {
+    position: fixed;
+    inset: 0;
+    background: #ffffff;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 30;
+}
+
+.flash.flash-active {
+    animation: flash-fade 200ms ease-out;
+}
+
+@keyframes flash-fade {
+    0% {
+        opacity: 0.95;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+/* -------- Overlays (start, completion, error) -------- */
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: var(--bg);
+}
+
+.overlay-visible {
+    display: flex;
+}
+
+.overlay-hidden {
+    display: none !important;
+}
+
+.overlay-content {
+    max-width: 520px;
+    width: 100%;
+    text-align: center;
+}
+
+.overlay-content h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin: 0 0 12px;
+}
+
+.overlay-content p {
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.45;
+    margin: 0 0 20px;
+}
+
+.overlay-hint {
+    opacity: 0.7;
+    font-size: 14px;
+}
+
+.button-primary {
+    display: inline-block;
+    min-width: 200px;
+    min-height: 56px;
+    padding: 14px 28px;
+    font-size: 18px;
+    font-weight: 800;
+    color: #0b0f17;
+    background: #ffffff;
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.button-primary:active {
+    transform: translateY(1px);
+}
+
+/* -------- Debug + demo badges -------- */
+
+#debug-panel {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    z-index: 50;
+    margin: 0;
+    padding: 8px 10px;
+    background: rgba(0, 0, 0, 0.78);
+    color: #b6f0a8;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11px;
+    line-height: 1.35;
+    white-space: pre;
+    border-radius: 6px;
+    pointer-events: none;
+}
+
+/* -------- Map overlay -------- */
+
+.map-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    display: none;
+    background: #0b0f17;
+}
+
+.map-overlay.map-open {
+    display: block;
+}
+
+#map {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* Compass HUD (#hud-bottom) is camera-only. Hide it when the map is open. */
+body.view-map #hud-bottom {
+    display: none;
+}
+
+/* Distance-to-closest readout, shown over the map. */
+.map-distance {
+    position: absolute;
+    top: max(env(safe-area-inset-top), 16px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: var(--bg-banner);
+    color: var(--fg);
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-shadow: var(--shadow-text);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+    white-space: nowrap;
+    pointer-events: none;
+    display: none;
+}
+body.view-map .map-distance {
+    display: block;
+}
+
+/* Leaflet popups read better with our brutal-contrast palette. */
+.leaflet-popup-content {
+    font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    margin: 8px 12px;
+}
+
+/* Pokemon sprite markers — transparent PNG icons from pokemondb. */
+.spawn-icon {
+    background: transparent;
+    border: 0;
+}
+.leaflet-container .leaflet-marker-pane img.spawn-sprite {
+    max-width: 100% !important;
+    max-height: auto;
+    width: auto;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    /* Crisp pixel art at small sizes. */
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+/* User dot on the map: blue circle with a pointed arrow showing heading. */
+.user-icon {
+    background: transparent;
+    border: 0;
+}
+.user-dot {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.user-dot::after {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background: var(--gbc-red, #b8202a);
+    border: 3px solid var(--gbc-cream, #f8e8c0);
+    border-radius: 0; /* GBC-flavoured square dot */
+    outline: 2px solid var(--gbc-ink, #2a1810);
+}
+.user-arrow {
+    position: absolute;
+    width: 0;
+    height: 0;
+    /* Triangle pointing up (north). Rotated by inline transform. */
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 18px solid var(--gbc-red, #b8202a);
+    /* Pivot at the centre of the dot, arrow tip 16px above. */
+    transform-origin: 50% 100%;
+    margin-top: -28px;
+    transition: transform 0.1s linear;
+}
+
+#demo-badge {
+    position: fixed;
+    top: 8px;
+    right: 8px;
+    z-index: 50;
+    padding: 6px 10px;
+    background: var(--accent);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    border-radius: 999px;
+    pointer-events: none;
+}

@@ -1,0 +1,25 @@
+{
+  "name": "pokemon-hunt",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.6.5",
+  "description": "Location-based AR creature scavenger hunt (open-source 8th Wall + Three.js + Vite + TS).",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --port 3000",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4",
+    "three": "^0.183.0"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.0",
+    "@types/node": "^25.6.0",
+    "@types/three": "^0.183.0",
+    "typescript": "^5.4.0",
+    "vite": "^5.4.0"
+  }
+}
