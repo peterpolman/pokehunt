@@ -30,7 +30,7 @@ export function App() {
 
   const [phase, setPhase] = useState<Phase>("start");
   const [notification, setNotification] = useState("");
-  const [flashOn, setFlashOn] = useState(false);
+
   const [foundTick, setFoundTick] = useState(0);
   const [elapsedMs, setElapsedMs] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -84,12 +84,6 @@ export function App() {
   useEffect(() => {
     if (phase !== "running" || !canvasRef.current) return;
     const off = attachCanvasTap(canvasRef.current, compass, {
-      onFlash: () => {
-        setFlashOn(true);
-        if (typeof navigator.vibrate === "function")
-          navigator.vibrate([40, 60, 40, 60, 40]);
-        setTimeout(() => setFlashOn(false), 220);
-      },
       onBanner: showNotification,
       onComplete: (ms) => {
         setElapsedMs(ms);
@@ -120,7 +114,6 @@ export function App() {
           foundCount={arRunning ? compassState.foundCount : undefined}
           total={arRunning ? compassState.total : undefined}
         />
-
         <Content>
           {arRunning && (
             <>
@@ -140,7 +133,6 @@ export function App() {
             <CompletionView elapsedMs={elapsedMs} onReplay={onReplay} />
           )}
         </Content>
-
         <Footer state={compassState} notification={notification} />
       </div>
     </>

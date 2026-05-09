@@ -1,4 +1,4 @@
-// Catch flow — pure logic. UI side effects (flash, banner, completion) are
+// Catch flow — pure logic. UI side effects (banner, completion) are
 // signalled via callbacks so the React tree owns them.
 
 import * as THREE from "three";
@@ -7,7 +7,6 @@ import { arState, raycaster, resetCurrentModel } from "./ar/state.ts";
 import { SPAWNS } from "../data/spawns.ts";
 
 interface CatchHandlers {
-  onFlash: () => void;
   onBanner: (text: string, durationMs?: number) => void;
   onComplete: (elapsedMs: number) => void;
   /** Called whenever catchCurrent succeeds — host can vibrate, play sound, etc. */
@@ -23,7 +22,12 @@ export function attachCanvasTap(
     const s = arState;
     if (!s.camera || !s.currentModel) return;
     const cs = compass.state();
-    if (!cs.target || cs.distance === undefined || cs.distance > cs.target.catchRadius) return;
+    if (
+      !cs.target ||
+      cs.distance === undefined ||
+      cs.distance > cs.target.catchRadius
+    )
+      return;
     const rect = canvas.getBoundingClientRect();
     const ndc = new THREE.Vector2(
       ((e.clientX - rect.left) / rect.width) * 2 - 1,
@@ -41,7 +45,6 @@ export function attachCanvasTap(
 export function catchCurrent(compass: Compass, h: CatchHandlers): void {
   const t = compass.state().target;
   if (!t) return;
-  h.onFlash();
   h.onBanner(`Caught ${t.name}!`, 2000);
   compass.markFound(t.id);
   resetCurrentModel();

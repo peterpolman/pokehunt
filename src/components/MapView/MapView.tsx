@@ -3,11 +3,11 @@
 // update would be insanely expensive — that's why this is imperative inside
 // useEffect, not declarative JSX.
 
-import { useEffect, useRef } from 'react';
-import L, { type Map as LMap, type Marker, type Circle } from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import { SPAWNS } from '../../data/spawns.ts';
-import s from './MapView.module.scss';
+import { useEffect, useRef } from "react";
+import L, { type Map as LMap, type Marker, type Circle } from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { SPAWNS } from "../../data/spawns.ts";
+import s from "./MapView.module.scss";
 
 interface Props {
   state: CompassState;
@@ -30,9 +30,9 @@ export function MapView({ state, found, visible }: Props) {
       : [SPAWNS[0].lat, SPAWNS[0].lng];
 
     const map = L.map(mapEl.current, { zoomControl: true }).setView(center, 18);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
-      attribution: '© OpenStreetMap',
+      attribution: "© OpenStreetMap",
     }).addTo(map);
 
     for (const spawn of SPAWNS) {
@@ -43,10 +43,13 @@ export function MapView({ state, found, visible }: Props) {
         iconSize: [44, 44],
         iconAnchor: [22, 22],
       });
-      const marker = L.marker([spawn.lat, spawn.lng], { icon, interactive: false }).addTo(map);
+      const marker = L.marker([spawn.lat, spawn.lng], {
+        icon,
+        interactive: false,
+      }).addTo(map);
       L.circle([spawn.lat, spawn.lng], {
         radius: spawn.catchRadius,
-        color: '#3b82f6',
+        color: "#3b82f6",
         weight: 1,
         opacity: 0.5,
         fillOpacity: 0.08,
@@ -63,7 +66,10 @@ export function MapView({ state, found, visible }: Props) {
     if (visible && mapRef.current) {
       setTimeout(() => mapRef.current?.invalidateSize(), 50);
       if (state.position) {
-        mapRef.current.setView([state.position.lat, state.position.lng], mapRef.current.getZoom());
+        mapRef.current.setView(
+          [state.position.lat, state.position.lng],
+          mapRef.current.getZoom(),
+        );
       }
     }
   }, [visible]);
@@ -76,7 +82,7 @@ export function MapView({ state, found, visible }: Props) {
     const pos = state.position;
     if (pos) {
       const latlng: [number, number] = [pos.lat, pos.lng];
-      const rot = typeof state.heading === 'number' ? state.heading : 0;
+      const rot = typeof state.heading === "number" ? state.heading : 0;
       const html = `
         <div class="${s.userDot}">
           <div class="${s.userArrow}" style="transform: rotate(${rot}deg)"></div>
@@ -88,10 +94,13 @@ export function MapView({ state, found, visible }: Props) {
         iconAnchor: [20, 20],
       });
       if (!userMarkerRef.current) {
-        userMarkerRef.current = L.marker(latlng, { icon, interactive: false }).addTo(map);
+        userMarkerRef.current = L.marker(latlng, {
+          icon,
+          interactive: false,
+        }).addTo(map);
         accuracyCircleRef.current = L.circle(latlng, {
           radius: pos.accuracy,
-          color: '#3b82f6',
+          color: "#3b82f6",
           weight: 1,
           opacity: 0.4,
           fillOpacity: 0.08,
@@ -108,12 +117,12 @@ export function MapView({ state, found, visible }: Props) {
       const m = spawnMarkersRef.current.get(spawn.id);
       if (!m) continue;
       const el = m.getElement();
-      if (el) el.style.opacity = found.has(spawn.id) ? '0.35' : '1';
+      if (el) el.style.opacity = found.has(spawn.id) ? "0.35" : "1";
     }
   }, [state, found]);
 
   return (
-    <div className={`${s.overlay}${visible ? ' ' + s.open : ''}`}>
+    <div className={`${s.overlay} {visible ? " " + s.open : ""}`}>
       <div ref={mapEl} className={s.map} />
     </div>
   );
