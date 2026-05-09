@@ -83,17 +83,7 @@ export class Compass {
     await new Promise<void>((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(
         (pos) => { this._setPosition(pos); resolve(); },
-        (err) => {
-          // Translate PositionError code into a specific message so users
-          // see *why* the prompt failed (denied vs unavailable vs timeout).
-          // Codes: 1 PERMISSION_DENIED, 2 POSITION_UNAVAILABLE, 3 TIMEOUT.
-          console.warn('[compass] geolocation error', err.code, err.message);
-          let code = 'geolocation-denied';
-          if (err.code === 2) code = 'geolocation-unavailable';
-          else if (err.code === 3) code = 'geolocation-timeout';
-          if (this.onError) this.onError(code);
-          reject(err);
-        },
+        (err) => { if (this.onError) this.onError('geolocation-denied'); reject(err); },
         { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 },
       );
     });

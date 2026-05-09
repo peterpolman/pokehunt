@@ -348,7 +348,9 @@ body {
 .map-overlay {
     position: fixed;
     inset: 0;
-    z-index: 45;
+    /* Above XRExtras Loading spinner so the map is visible while the AR
+       engine is still warming up. */
+    z-index: 99999;
     display: none;
     background: #0b0f17;
 }
@@ -434,28 +436,29 @@ body.view-map .map-distance {
     align-items: center;
     justify-content: center;
 }
-.user-dot::after {
+.user-arrow {
+    /* Wrapper sized to the triangle so transform-origin: center is correct.
+       The triangle itself is drawn via ::before so the inline `transform:
+       rotate(...)` rotates around the wrapper's geometric centre. */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 18px;
+    margin: -9px 0 0 -8px;
+    transform-origin: 50% 50%;
+    transition: transform 0.1s linear;
+}
+.user-arrow::before {
     content: "";
     position: absolute;
-    width: 14px;
-    height: 14px;
-    background: var(--gbc-red, #b8202a);
-    border: 3px solid var(--gbc-cream, #f8e8c0);
-    border-radius: 0; /* GBC-flavoured square dot */
-    outline: 2px solid var(--gbc-ink, #2a1810);
-}
-.user-arrow {
-    position: absolute;
+    top: 0;
+    left: 0;
     width: 0;
     height: 0;
-    /* Triangle pointing up (north). Rotated by inline transform. */
     border-left: 8px solid transparent;
     border-right: 8px solid transparent;
     border-bottom: 18px solid var(--gbc-red, #b8202a);
-    /* Pivot at the centre of the dot, arrow tip 16px above. */
-    transform-origin: 50% 100%;
-    margin-top: -28px;
-    transition: transform 0.1s linear;
 }
 
 #demo-badge {

@@ -79,18 +79,23 @@ export async function syncCurrentModel(compass: Compass): Promise<void> {
   if (needsAnchor) {
     const world = localPos(cs.arrowAngle, cs.distance);
     s.camera.localToWorld(world);
+    // Snap to ground. SLAM world ground sits at y=0 because we seeded the
+    // camera at (0, 1.6, 0) in xr.ts onStart. Without this the model floats
+    // at the camera's y (eye height).
+    world.y = 0;
     s.currentModel.position.copy(world);
+    // Face the user once at anchor time so they see the model's front when
+    // they arrive. Y-locked so it stands upright. After this we never
+    // rotate again — user walks around a fixed model.
+    if (!s.currentModel.userData.placeholder) {
+      const cp = new THREE.Vector3();
+      s.camera.getWorldPosition(cp);
+      s.currentModel.lookAt(cp.x, world.y, cp.z);
+    }
     s.anchoredForId = tgt.id;
     s.anchoredAtGps = cs.position ? { lat: cs.position.lat, lng: cs.position.lng } : null;
     s.anchoredWorldPos = world.clone();
     s.anchorCount++;
-  }
-
-  // Y-locked billboard (skip placeholders — they spin).
-  if (!s.currentModel.userData.placeholder) {
-    const cp = new THREE.Vector3();
-    s.camera.getWorldPosition(cp);
-    s.currentModel.lookAt(cp.x, s.currentModel.position.y, cp.z);
   }
 }
 

@@ -53,16 +53,14 @@ export function bootXR(compass: Compass): void {
   }
   const canvas = document.getElementById('camerafeed') as HTMLCanvasElement;
   const xr = XR8 as any;
+  // FullWindowCanvas is what binds the engine session to the canvas;
+  // without it XR8.run fails with "No valid session manager".
   xr.addCameraPipelineModules([
     xr.GlTextureRenderer.pipelineModule(),
     xr.Threejs.pipelineModule(),
     xr.XrController.pipelineModule(),
     XRExtras.FullWindowCanvas.pipelineModule(),
-    XRExtras.Loading.pipelineModule(),
-    XRExtras.RuntimeError.pipelineModule(),
     huntPipelineModule(compass),
   ]);
-  // ANY allows desktop browsers (laptop debug). SLAM is degraded but the
-  // map + AR flow still works.
-  xr.run({ canvas, allowedDevices: xr.XrConfig?.device?.()?.ANY ?? 'any' });
+  xr.run({ canvas });
 }

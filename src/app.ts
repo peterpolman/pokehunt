@@ -22,24 +22,6 @@ const params = new URLSearchParams(location.search);
 // testable anywhere.
 const USE_GPS_SPAWNS = params.get('here') === '1';
 
-// HTTPS + trusted cert required for camera + sensors on iOS Safari.
-// `window.isSecureContext` is the browser's authoritative answer — it's
-// false on http, AND on https with a self-signed cert that the device's
-// trust store doesn't recognise (the most common LAN-IP-on-phone case).
-(function enforceSecureContext() {
-  const isLocalhost =
-    location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-  if (isLocalhost) return; // localhost is always a secure context
-  if (!window.isSecureContext) {
-    showFatal(
-      `This page isn't a secure context (${location.protocol}//${location.hostname}). ` +
-      `Geolocation + motion sensors will be denied silently. Use https with a ` +
-      `trusted cert: install the mkcert root CA on the device, or use a public ` +
-      `tunnel (ngrok / cloudflared / Vercel preview URL).`
-    );
-    throw new Error('insecure-context');
-  }
-})();
 
 const compass = new Compass();
 const mapHandle = attachMap(compass);
@@ -59,16 +41,7 @@ function wireCompass(): void {
     showBanner(`${spawn.name} slipped away — get closer.`, 1500);
   };
   compass.onError = (code) => {
-    if (code === 'motion-denied')
-      showFatal('Motion access is needed for the compass. Reload and tap Allow.');
-    else if (code === 'geolocation-denied')
-      showFatal('Location access denied. Browser settings → Site settings → enable Location, then reload.');
-    else if (code === 'geolocation-unavailable')
-      showFatal('Phone reports location unavailable. Check that Location Services are on and the browser has permission.');
-    else if (code === 'geolocation-timeout')
-      showFatal('GPS timed out. Move outdoors and reload.');
-    else if (code === 'geolocation-missing')
-      showFatal('Geolocation isn\'t available on this device.');
+    showFatal(`Couldn't start: ${code}. Reload and grant permissions.`);
   };
 }
 
