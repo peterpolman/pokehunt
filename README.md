@@ -1,43 +1,49 @@
-# Creature Hunt
+# Poké Safari
 
-A location-based AR scavenger hunt. Walk around an outdoor area, follow a
-compass to GPS-anchored creatures, tap each one through your phone's camera
-to catch it. The app shows a map when no creature is nearby and switches to
-the AR camera automatically when you're within 20 m of one.
+A location-based AR scavenger hunt. An admin places creatures on a map of your chosen area; players walk to each spot, line up the creature in their phone camera, snap a photo to catch it. The app starts on a map and switches to the AR camera automatically when the player is within range of a creature.
 
 ## Stack
 
-- **Vite + TypeScript** for the build.
+- **React 19 + Vite + TypeScript** for the build and UI.
+- **react-router-dom** for routing (`/home`, `/pokedex`, `/admin`).
 - **Three.js** for AR rendering, **Leaflet** for the map view.
 - **8th Wall Engine Binary** (open-source) for camera + SLAM tracking.
+- **localStorage** as the persistence layer (no backend).
 - Static deploy on Vercel.
 
 ## Project layout
 
 ```
 src/
-├── app.ts                # boot
-├── core/                 # pure helpers + ambient types
-├── data/spawns.ts        # spawn table + ring generator
-├── adapters/             # browser / 3rd-party wrappers
-│   ├── compass.ts        # GPS + DeviceOrientation
-│   ├── map.ts            # Leaflet
-│   ├── xr.ts             # 8th Wall + Three scene boot
-│   ├── ux.ts             # haptics, banner, sounds
-│   └── dom.ts
-└── features/             # domain logic
-    ├── ar/{state,anchor,model}.ts
-    ├── catch.ts
-    ├── hud.ts
-    └── view-mode.ts
-public/models/            # 21 .glb models + 21 .png sprite icons
+├── main.tsx                # boot, BrowserRouter
+├── App.tsx                 # route table
+├── core/                   # pure helpers + ambient types
+├── data/
+│   ├── spawns.ts           # roster (22 creatures + national dex#)
+│   ├── placed.ts           # admin-placed coordinates (localStorage)
+│   └── found.ts            # caught spawn ids (localStorage)
+├── adapters/
+│   ├── compass.ts          # GPS + DeviceOrientation
+│   └── xr.ts               # 8th Wall + Three scene boot
+├── features/
+│   ├── ar/{state,anchor,model}.ts
+│   ├── catch.ts            # catch flow (banner, mark found, next target)
+│   └── photo.ts            # canvas → PNG download
+├── pages/
+│   ├── Home.tsx            # landing
+│   ├── Pokedex.tsx         # the hunt experience
+│   └── Admin.tsx           # spawn placement
+├── components/             # Header, Footer, MapView, Hud, Shutter,
+│                           # PokemonDialog, ConfirmDialog, EmptyHunt, …
+└── hooks/                  # useCompass, useLongPress
+public/models/              # .glb models + .png sprite icons
 ```
 
 ## Usage
 
 ```sh
 pnpm install
-pnpm dev          # vite dev server, port 3000
+pnpm dev          # vite dev server
 pnpm build        # tsc --noEmit && vite build → dist/
 pnpm preview      # serve dist/ locally
 pnpm typecheck    # tsc only
@@ -69,24 +75,50 @@ cloudflared tunnel --url https://localhost:3000
 ngrok http https://localhost:3000
 ```
 
-The app's secure-context check blocks startup with a clear error if the cert
-is untrusted.
+## Routes
+
+- **`/home`** — landing screen.
+- **`/pokedex`** — the hunt. Shows a map until the player is within range,
+  then switches to the AR camera with a shutter button to catch.
+- **`/admin`** — spawn placement. Click the map → pick a creature from the
+  roster dialog → marker drops at that coordinate. Click a placed marker
+  to remove it. "Reset all" wipes both placed coords and caught state.
+
+The admin route is reachable via long-press on the blue Header lens from
+`/pokedex`.
+
+## Hunt flow
+
+- The roster lives in code (`src/data/spawns.ts`). The active hunt is the
+  subset the admin has placed; unplaced creatures don't appear.
+- Players see an empty-state CTA on `/pokedex` until at least one creature
+  is placed.
+- Distance thresholds drive view + interaction state:
+  - **≥ 20 m** → map view.
+  - **< 20 m** → AR camera with HUD (compass arrow + sensor banners).
+  - **≤ catch radius** (default 10 m) → shutter button enabled.
+- Tapping the shutter triggers a flash, captures the WebGL canvas to PNG,
+  downloads it to the device, and marks the creature caught. Caught state
+  persists across reloads; map markers dim, the Header counter ticks up.
 
 ## Spawns + assets
 
-- Coordinates and per-spawn config: `src/data/spawns.ts`. Pairwise distance
-  is kept ≥ 50 m so AR mode shows one creature at a time.
-- Models + sprites: `public/models/<key>.glb` and `<key>.png`. Filename stem
-  matches the `key` field in the spawn table.
+- Roster + per-creature config (name, dex#, model key, scale, optional
+  catch radius): `src/data/spawns.ts`.
+- Models + sprites: `public/models/<key>.glb` and `<key>.png`. Filename
+  stem matches the `key` field in the roster.
+- Coordinates are not in code — the admin places them at runtime.
 
-## View modes
+## Storage
 
-- **< 20 m** → AR camera, tap the creature in the catch radius to catch.
-- **≥ 20 m** → full-screen map, sprite markers per spawn, blue dot with
-  heading arrow at your position, distance pill on top.
+All persistence is per-device in `localStorage`:
 
-The XR8 camera stream stays alive across mode switches, so toggling never
-re-prompts for permissions.
+| Key                     | Shape                       | Purpose                  |
+| ----------------------- | --------------------------- | ------------------------ |
+| `pokemon-hunt:placed`   | `[{id, lat, lng}, …]`       | admin-placed spawn coords |
+| `pokemon-hunt:found`    | `[id, …]`                   | caught creature ids       |
+
+There is no backend; clearing browser data resets the hunt.
 
 ## Deploy (Vercel)
 
@@ -94,14 +126,17 @@ re-prompts for permissions.
 pnpm dlx vercel --prod
 ```
 
-`vercel.json` pins pnpm install + build commands and sets the
-`Permissions-Policy` header for camera + geolocation + motion.
+`vercel.json` pins pnpm install + build commands, adds an SPA rewrite for
+client-side routing, and sets the `Permissions-Policy` header for camera +
+geolocation + motion sensors.
 
 ## Notes
 
 - Real Pokémon assets sit in `public/models/`. Fine for personal use; do
   not redistribute publicly — IP belongs to The Pokémon Company / Niantic.
 - SLAM tracking on a stationary laptop webcam is degraded (no parallax).
-  Map view + spawn markers still work.
-- GPS accuracy outdoors is typically 5–15 m; the app shows a "Weak GPS
-  signal" banner when accuracy degrades past 20 m.
+  Map view + spawn placement still work.
+- GPS accuracy outdoors is typically 5–15 m; the HUD surfaces a "weak GPS"
+  banner when accuracy degrades past 20 m.
+- The WebGL context is created with `preserveDrawingBuffer: true` so the
+  shutter can read pixels off the canvas after each frame.
