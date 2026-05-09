@@ -12,8 +12,6 @@ import { Footer } from "./components/Footer";
 import { Content } from "./components/Content";
 import { StartView } from "./components/StartView";
 import { CompletionView } from "./components/CompletionView";
-import { ErrorView } from "./components/ErrorView";
-import { CatchFlash } from "./components/CatchFlash";
 import { Hud } from "./components/Hud";
 import { MapView } from "./components/MapView";
 import s from "./app.module.scss";
@@ -23,7 +21,7 @@ const AR_DISTANCE_M = 20;
 // 8th Wall reads window.THREE on init.
 (window as any).THREE = THREE;
 
-type Phase = "start" | "running" | "completed" | "error";
+type Phase = "start" | "running" | "completed";
 
 export function App() {
   const compassRef = useRef<Compass | null>(null);
@@ -31,7 +29,6 @@ export function App() {
   const compass = compassRef.current;
 
   const [phase, setPhase] = useState<Phase>("start");
-  const [errorMsg, setErrorMsg] = useState("");
   const [notification, setNotification] = useState("");
   const [flashOn, setFlashOn] = useState(false);
   const [foundTick, setFoundTick] = useState(0);
@@ -51,8 +48,10 @@ export function App() {
       showNotification(`${s.name.toUpperCase()} LEFT RANGE`);
     };
     compass.onError = (code) => {
-      setErrorMsg(`Couldn't start: ${code}. Reload and grant permissions.`);
-      setPhase("error");
+      showNotification(
+        `Couldn't start: ${code}. Reload and grant permissions.`,
+      );
+      setPhase("start");
     };
     return () => {
       compass.onEnterRadius = null;
@@ -62,8 +61,8 @@ export function App() {
   }, [compass]);
 
   const fatal = (message: string) => {
-    setErrorMsg(message);
-    setPhase("error");
+    showNotification(message);
+    setPhase("start");
   };
 
   const onStart = () => {
@@ -75,12 +74,10 @@ export function App() {
       })
       .catch((e: unknown) => {
         console.warn("[hunt] start failed", e);
-        if (phase !== "error") {
-          setErrorMsg(
-            `Couldn't start the hunt. Check your permissions and reload.`,
-          );
-          setPhase("error");
-        }
+        showNotification(
+          "Couldn't start the hunt. Check permissions and reload.",
+        );
+        setPhase("start");
       });
   };
 
@@ -116,10 +113,6 @@ export function App() {
 
   return (
     <>
-      {/* Camera canvas at the root, BEFORE .app, so it paints first and the
-          (transparent) .app paints on top. XR8's FullWindowCanvas module
-          sets it to fixed full-window; header/footer/side borders cover
-          the strips we don't want camera visible through. */}
       <canvas id="camerafeed" ref={canvasRef} className={s.canvas} />
 
       <div className={s.app}>
@@ -141,8 +134,6 @@ export function App() {
             </>
           )}
 
-          <CatchFlash active={flashOn} />
-
           {phase === "start" && <StartView onStart={onStart} />}
 
           {phase === "completed" && (
@@ -151,7 +142,6 @@ export function App() {
         </Content>
 
         <Footer state={compassState} notification={notification} />
-        {phase === "error" && <ErrorView message={errorMsg} />}
       </div>
     </>
   );
