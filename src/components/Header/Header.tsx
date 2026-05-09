@@ -36,7 +36,7 @@ export function Header(props: Props) {
             ADMIN · {props.placedCount}/{props.total}
           </div>
           <button className={s.action} onClick={props.onDone}>
-            DONE →
+            KLAAR →
           </button>
         </>
       ) : (

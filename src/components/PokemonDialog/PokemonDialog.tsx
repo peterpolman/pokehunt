@@ -28,8 +28,8 @@ export function PokemonDialog({ open, placedIds, onPick, onClose }: Props) {
   return (
     <dialog ref={ref} className={s.dialog} onClose={onClose}>
       <header className={s.header}>
-        <h2 className={s.title}>Choose Pokémon</h2>
-        <button className={s.close} onClick={onClose} aria-label="Close">
+        <h2 className={s.title}>Kies Pokémon</h2>
+        <button className={s.close} onClick={onClose} aria-label="Sluiten">
           ×
         </button>
       </header>

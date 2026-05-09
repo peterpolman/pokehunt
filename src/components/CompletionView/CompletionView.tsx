@@ -11,10 +11,10 @@ export function CompletionView({ elapsedMs, onReplay }: Props) {
   const sec = total % 60;
   return (
     <div className={s.screen}>
-      <h1>All creatures found!</h1>
-      <p>{`Time: ${m}m ${sec}s`}</p>
+      <h1>Alle pokémon gevonden!</h1>
+      <p>{`Tijd: ${m}m ${sec}s`}</p>
       <button className={s.button} onClick={onReplay}>
-        Play again
+        Opnieuw spelen
       </button>
     </div>
   );

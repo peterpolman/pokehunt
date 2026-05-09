@@ -37,13 +37,13 @@ export function Hud({ state: cs, visible }: Props) {
     <div className={s.overlay}>
       <div className={s.banners}>
         <div className={banner('', calibrationVisible)}>
-          Compass needs calibration — wave your phone in a figure 8.
+          Kompas moet gekalibreerd — beweeg je telefoon in een acht.
         </div>
         <div className={banner(s.warn, cs.weakGps)}>
-          Weak GPS signal — move to open sky.
+          Zwak GPS-signaal — ga naar open lucht.
         </div>
         <div className={banner(s.warn, cs.headingStuck)}>
-          Compass unavailable — using map only.
+          Kompas niet beschikbaar — alleen kaart.
         </div>
       </div>
 

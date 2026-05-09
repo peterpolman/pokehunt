@@ -96,20 +96,20 @@ export function Admin() {
     const entry = ROSTER_BY_ID.get(id);
     persist([...placed, { id, ...pendingLatLng }]);
     setPendingLatLng(null);
-    if (entry) setNotification(`Placed ${entry.name.toUpperCase()}`);
+    if (entry) setNotification(`GEPLAATST ${entry.name.toUpperCase()}`);
   };
 
   const onMarkerAction = (id: number) => {
     const entry = ROSTER_BY_ID.get(id);
     persist(placed.filter((p) => p.id !== id));
-    if (entry) setNotification(`Removed ${entry.name.toUpperCase()}`);
+    if (entry) setNotification(`VERWIJDERD ${entry.name.toUpperCase()}`);
   };
 
   const onResetConfirm = () => {
     clearPlaced();
     setPlaced([]);
     setResetOpen(false);
-    setNotification("Cleared all");
+    setNotification("Alles gewist");
   };
 
   const onDone = () => {
@@ -142,7 +142,7 @@ export function Admin() {
           visible
           onMapClick={onMapClick}
           markersInteractive
-          markerActionLabel="Remove"
+          markerActionLabel="Verwijderen"
           onMarkerAction={onMarkerAction}
         />
       </Content>
@@ -162,10 +162,10 @@ export function Admin() {
       />
       <ConfirmDialog
         open={resetOpen}
-        title="Reset all"
-        message="Remove every placed pokémon and clear the hunt setup?"
+        title="Alles resetten"
+        message="Alle geplaatste pokémon verwijderen en safari resetten?"
         confirmLabel="Reset"
-        cancelLabel="Cancel"
+        cancelLabel="Annuleren"
         onConfirm={onResetConfirm}
         onCancel={() => setResetOpen(false)}
       />

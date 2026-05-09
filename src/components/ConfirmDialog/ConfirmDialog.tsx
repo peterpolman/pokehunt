@@ -17,8 +17,8 @@ export function ConfirmDialog({
   open,
   title,
   message,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
+  confirmLabel = "Bevestigen",
+  cancelLabel = "Annuleren",
   onConfirm,
   onCancel,
 }: Props) {

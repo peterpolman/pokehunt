@@ -7,8 +7,8 @@ import s from "./EmptyHunt.module.scss";
 export function EmptyHunt() {
   return (
     <div className={s.screen}>
-      <h1>No hunt configured</h1>
-      <p>An admin should place pokémon on the map before starting the hunt.</p>
+      <h1>Geen safari ingesteld</h1>
+      <p>Een admin moet pokémon op de kaart plaatsen voordat de safari begint.</p>
     </div>
   );
 }

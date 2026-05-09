@@ -32,14 +32,14 @@ export function Footer(props: Props) {
         {props.mode === "admin" ? (
           <>
             <div className={s.row}>
-              <span className={s.label}>PLACED:</span>
+              <span className={s.label}>GEPLAATST:</span>
               <span className={s.value}>
                 {props.placedCount} / {props.total}
               </span>
             </div>
             <div className={`${s.row} ${s.distance}`}>
               <button className={s.resetButton} onClick={props.onReset}>
-                RESET ALL
+                RESET ALLES
               </button>
             </div>
           </>

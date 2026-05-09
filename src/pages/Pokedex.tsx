@@ -46,14 +46,14 @@ export function Pokedex() {
   useEffect(() => {
     compass.onEnterRadius = (s) => {
       if (typeof navigator.vibrate === "function") navigator.vibrate(50);
-      showNotification(`${s.name.toUpperCase()} ENTERED RANGE`);
+      showNotification(`${s.name.toUpperCase()} BINNEN BEREIK`);
     };
     compass.onLeaveRadius = (s) => {
-      showNotification(`${s.name.toUpperCase()} LEFT RANGE`);
+      showNotification(`${s.name.toUpperCase()} BUITEN BEREIK`);
     };
     compass.onError = (code) => {
       showNotification(
-        `Couldn't start: ${code}. Reload and grant permissions.`,
+        `Kon niet starten: ${code}. Herlaad en geef toestemming.`,
       );
       setPhase("start");
     };
@@ -79,7 +79,7 @@ export function Pokedex() {
       .catch((e: unknown) => {
         console.warn("[hunt] start failed", e);
         showNotification(
-          "Couldn't start the hunt. Check permissions and reload.",
+          "Kon safari niet starten. Controleer toestemmingen en herlaad.",
         );
         setPhase("start");
       });
