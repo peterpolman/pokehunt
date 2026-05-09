@@ -46,10 +46,7 @@ export function Footer(props: Props) {
         ) : (
           <HuntRows state={props.state} />
         )}
-        <div className={s.ticker}>
-          {pinned}
-          <span className={s.blink}>_</span>
-        </div>
+        {pinned && <div className={s.ticker}>{pinned}</div>}
       </div>
     </footer>
   );

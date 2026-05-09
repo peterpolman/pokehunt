@@ -68,22 +68,11 @@ $crt-dim: #2da349;
 }
 
 .ticker {
-    margin-top: 1rem;
+    margin-top: 8px;
     font-size: 12px;
     letter-spacing: 0.12em;
     color: $crt-dim;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.blink {
-    display: inline-block;
-    animation: crtBlink 1s steps(2, end) infinite;
-}
-
-@keyframes crtBlink {
-    50% {
-        opacity: 0;
-    }
 }

@@ -50,11 +50,13 @@ $bg-banner: rgba(11, 15, 23, 0.94);
 }
 
 .compass {
-    position: relative;
-    width: 96px;
-    height: 96px;
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    width: 48px;
+    height: 48px;
     border-radius: 999px;
-    border: 4px solid #ffffff;
+    border: 2px solid #ffffff;
     background: rgba(11, 15, 23, 0.55);
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
 
@@ -79,13 +81,13 @@ $bg-banner: rgba(11, 15, 23, 0.94);
     left: 50%;
     width: 0;
     height: 0;
-    border-left: 16px solid transparent;
-    border-right: 16px solid transparent;
-    border-bottom: 38px solid #ffffff;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 19px solid #ffffff;
     transform-origin: 50% 70%;
     transition: transform 0.1s linear;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.9));
-    margin: -27px 0 0 -16px;
+    margin: -13px 0 0 -8px;
 
     &.hidden {
         display: none;
@@ -94,10 +96,10 @@ $bg-banner: rgba(11, 15, 23, 0.94);
 
 @keyframes pulseSoft {
     0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.5); }
-    50%      { box-shadow: 0 0 0 14px rgba(255, 255, 255, 0); }
+    50%      { box-shadow: 0 0 0 7px rgba(255, 255, 255, 0); }
 }
 
 @keyframes pulseStrong {
     0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-    50%      { box-shadow: 0 0 0 22px rgba(239, 68, 68, 0); }
+    50%      { box-shadow: 0 0 0 11px rgba(239, 68, 68, 0); }
 }

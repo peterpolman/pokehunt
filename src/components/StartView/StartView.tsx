@@ -1,4 +1,4 @@
-import s from './StartView.module.scss';
+import s from "./StartView.module.scss";
 
 interface Props {
   onStart: () => void;
