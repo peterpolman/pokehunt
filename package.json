@@ -11,13 +11,9 @@
     "preview": "vite preview --port 3000",
     "typecheck": "tsc --noEmit",
     "convert-models": "bash scripts/convert-models.sh",
-    "fetch-sprites": "bash scripts/fetch-sprites.sh",
-    "sync-vendor": "bash scripts/sync-vendor.sh",
-    "prepare": "bash scripts/sync-vendor.sh"
+    "fetch-sprites": "bash scripts/fetch-sprites.sh"
   },
   "dependencies": {
-    "@8thwall/engine-binary": "^1.0.0",
-    "@8thwall/xrextras": "^1.0.0",
     "leaflet": "^1.9.4",
     "react": "^19.0.5",
     "react-dom": "^19.0.5",

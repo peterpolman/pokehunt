@@ -12,17 +12,20 @@
         <!-- styles.css is imported by src/app.ts and bundled by Vite. -->
 
         <!--
-            8th Wall runtime. Files copied from node_modules to public/vendor
-            on `pnpm install` (scripts/sync-vendor.sh). Same-origin — no CDN.
-            The engine self-discovers its chunks (xr-slam.js, resources/)
-            relative to its own URL.
+            8th Wall (open source). Engine Binary + XRExtras from CDN — these
+            are runtime singletons and don't bundle cleanly via npm. Three.js
+            and Leaflet are bundled by Vite via the TS imports.
         -->
         <script
-            src="/vendor/8thwall/xr.js"
+            src="https://cdn.jsdelivr.net/npm/@8thwall/engine-binary@1/dist/xr.js"
             async
+            crossorigin="anonymous"
             data-preload-chunks="slam"
         ></script>
-        <script src="/vendor/8thwall/xrextras.js"></script>
+        <script
+            src="https://cdn.jsdelivr.net/npm/@8thwall/xrextras@1/dist/xrextras.js"
+            crossorigin="anonymous"
+        ></script>
     </head>
     <body>
         <div id="root"></div>

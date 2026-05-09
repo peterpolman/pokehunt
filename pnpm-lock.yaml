@@ -8,12 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@8thwall/engine-binary':
-        specifier: ^1.0.0
-        version: 1.0.0
-      '@8thwall/xrextras':
-        specifier: ^1.0.0
-        version: 1.0.0
       leaflet:
         specifier: ^1.9.4
         version: 1.9.4
@@ -59,12 +53,6 @@ importers:
         version: 5.4.21(@types/node@25.6.0)(sass@1.99.0)
 
 packages:
-
-  '@8thwall/engine-binary@1.0.0':
-    resolution: {integrity: sha512-qH0WH7+HHQFtwzKL+TDEg8RT+RadC2eR3c2v+GcJW3Z+7ZedJYadHmA0lZcOXwntBbcQZkeKkj1HYuUKcZanrA==}
-
-  '@8thwall/xrextras@1.0.0':
-    resolution: {integrity: sha512-9lOLzQK6liELjMr9ltF81o1SkXJpkXx16ZFURtjZOwZXTTH5jIwBRNnbeKIbC6TqjCL/KOZyFEzOMyQQIAkDow==}
 
   '@babel/code-frame@7.29.0':
     resolution: {integrity: sha512-9NhCeYjq9+3uxgdtp20LSiJXJvN0FeCtNGpJxuMFZ1Kv3cWUNb6DOhJwUvcVCzKGR66cw4njwM6hrJLqgOwbcw==}
@@ -821,10 +809,6 @@ packages:
     resolution: {integrity: sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g==}
 
 snapshots:
-
-  '@8thwall/engine-binary@1.0.0': {}
-
-  '@8thwall/xrextras@1.0.0': {}
 
   '@babel/code-frame@7.29.0':
     dependencies:
