@@ -92,3 +92,9 @@ $pdx-blue: #2c8df0;
         transform: translateY(1px);
     }
 }
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    margin-left: auto;
+}

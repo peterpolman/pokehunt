@@ -32,14 +32,14 @@ export function Header(props: Props) {
         <span />
       </div>
       {props.mode === "admin" ? (
-        <>
+        <div className={s.actions}>
           <button className={s.action} onClick={props.onReset}>
             RESET
           </button>
           <button className={s.action} onClick={props.onDone}>
             KLAAR
           </button>
-        </>
+        </div>
       ) : (
         props.foundCount !== undefined &&
         props.total !== undefined && (

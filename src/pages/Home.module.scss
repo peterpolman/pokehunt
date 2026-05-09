@@ -1,0 +1,154 @@
+$pdx-red: #d2222a;
+$pdx-ink: #0d0d0d;
+$pdx-green: #34c759;
+
+.page {
+    position: fixed;
+    inset: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    // Body sets touch-action: none for the AR canvas; re-enable vertical
+    // panning on the homepage so it scrolls on mobile.
+    touch-action: pan-y;
+    background: #ffffff;
+    color: $pdx-ink;
+}
+
+.hero {
+    background: $pdx-red;
+    border-bottom: 4px solid $pdx-ink;
+    padding: 32px 20px 28px;
+    text-align: center;
+    color: #ffffff;
+}
+
+.title {
+    margin: 0 0 8px;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-shadow: 0 2px 0 $pdx-ink;
+}
+
+.tagline {
+    margin: 0;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    opacity: 0.95;
+}
+
+.body {
+    padding: 24px 20px 48px;
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    li {
+        font-size: 12px;
+        line-height: 1.5;
+        padding-left: 24px;
+        position: relative;
+
+        &::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: $pdx-green;
+            font-weight: 700;
+        }
+    }
+}
+
+.cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 36px;
+}
+
+.ctaButton {
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #ffffff;
+    background: $pdx-green;
+    border: 3px solid $pdx-ink;
+    border-radius: 6px;
+    padding: 12px 28px;
+    text-decoration: none;
+    text-shadow: 0 1px 0 $pdx-ink;
+    box-shadow: 0 3px 0 $pdx-ink;
+
+    &:active {
+        transform: translateY(2px);
+        box-shadow: 0 1px 0 $pdx-ink;
+    }
+}
+
+.ctaLink {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: $pdx-ink;
+    text-decoration: underline;
+}
+
+.gridHeading {
+    margin: 0 0 14px;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    color: $pdx-ink;
+    text-align: center;
+}
+
+.grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 10px;
+}
+
+.cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 4px;
+    border: 2px solid $pdx-ink;
+    border-radius: 6px;
+    background: #faf6ec;
+}
+
+.cellImg {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+}
+
+.cellDex {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    color: rgba(13, 13, 13, 0.65);
+}
+
+.cellName {
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    color: $pdx-ink;
+    text-align: center;
+    line-height: 1.2;
+}
