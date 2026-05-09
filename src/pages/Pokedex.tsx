@@ -37,7 +37,6 @@ export function Pokedex() {
   const [notification, setNotification] = useState("");
   const [flashing, setFlashing] = useState(false);
 
-  const [foundTick, setFoundTick] = useState(0);
   const [elapsedMs, setElapsedMs] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -107,13 +106,12 @@ export function Pokedex() {
         setElapsedMs(ms);
         setPhase("completed");
       },
-      onCaught: () => setFoundTick((n) => n + 1),
+      onCaught: () => {},
     });
   };
 
   const onReplay = () => {
     compass.reset();
-    setFoundTick((n) => n + 1);
     setPhase("running");
   };
 
@@ -141,7 +139,6 @@ export function Pokedex() {
               spawns={SPAWNS}
               found={compass.found}
               visible={showMap}
-              key={foundTick}
             />
             <Hud
               state={compassState}
