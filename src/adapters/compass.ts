@@ -242,9 +242,9 @@ export class Compass {
     if (now - this.lastUpdateEmit < 1000 / UPDATE_HZ) return;
     this.lastUpdateEmit = now;
 
-    if (!this.target || this.found.has(this.target.id)) {
-      this.target = this._pickTarget();
-    }
+    // Always re-pick so the nearest unfound spawn updates as the user
+    // walks. _pickTarget is O(spawns), trivial at 22.
+    this.target = this._pickTarget();
 
     const tgt = this.target;
     if (tgt && this.position) {
