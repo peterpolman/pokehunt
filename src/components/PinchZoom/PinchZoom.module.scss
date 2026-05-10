@@ -1,0 +1,11 @@
+.surface {
+    position: absolute;
+    inset: 0;
+    pointer-events: auto;
+    touch-action: none;
+    background: transparent;
+    // No z-index: rely on document order inside the parent .overlay so the
+    // Shutter button (rendered later) sits on top and still captures taps.
+    // Sibling banners + compass have pointer-events: none, so this surface
+    // catches every pointer that doesn't land on the Shutter.
+}
