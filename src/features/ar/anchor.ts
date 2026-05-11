@@ -10,7 +10,7 @@
 import * as THREE from 'three';
 import { distanceMeters } from '../../core/geo-utils.ts';
 import { arState, clock, resetCurrentModel } from './state.ts';
-import { loadModel } from './model.ts';
+import { getCachedModel, loadModel } from './model.ts';
 import type { Compass } from '../../adapters/compass.ts';
 
 const RENDER_DISTANCE = 25;
@@ -47,28 +47,44 @@ export async function syncCurrentModel(compass: Compass): Promise<void> {
     return;
   }
 
-  // Target changed -> swap models. Claim id BEFORE await to prevent the
-  // next frame's syncCurrentModel from starting a duplicate load.
+  // Target changed -> swap models. Preload at session start primes the
+  // cache, so the common path here is a synchronous cache hit (no await,
+  // no race window where target ping-pong can strand the swap).
   if (s.currentModelSpawnId !== tgt.id) {
-    if (s.currentModel) s.scene.remove(s.currentModel);
-    s.currentModel = null;
-    s.mixer = null;
-    s.anchoredForId = null;
-    s.anchoredAtGps = null;
     const claimed = tgt.id;
-    s.currentModelSpawnId = claimed;
-    try {
-      const m = await loadModel(claimed);
-      // Bail on stale claim or concurrent fill.
-      if (s.currentModelSpawnId !== claimed || s.currentModel) return;
-      if (compass.state().target?.id !== claimed) return;
-      s.scene.add(m);
-      s.currentModel = m;
-      s.mixer = (m.userData.mixer as THREE.AnimationMixer | undefined) ?? null;
-    } catch (e) {
-      console.warn('[hunt] model load failed', e);
-      if (s.currentModelSpawnId === claimed) s.currentModelSpawnId = null;
-      return;
+    const cached = getCachedModel(claimed);
+    if (cached) {
+      if (s.currentModel) s.scene.remove(s.currentModel);
+      s.scene.add(cached);
+      s.currentModel = cached;
+      s.currentModelSpawnId = claimed;
+      s.mixer =
+        (cached.userData.mixer as THREE.AnimationMixer | undefined) ?? null;
+      s.anchoredForId = null;
+      s.anchoredAtGps = null;
+    } else {
+      // Cache miss (preload still in flight). Claim id BEFORE await to
+      // prevent the next frame's syncCurrentModel from starting a duplicate
+      // load. On stale claim after await we restore null so the next frame
+      // re-evaluates against the actual current target.
+      if (s.currentModel) s.scene.remove(s.currentModel);
+      s.currentModel = null;
+      s.mixer = null;
+      s.anchoredForId = null;
+      s.anchoredAtGps = null;
+      s.currentModelSpawnId = claimed;
+      try {
+        const m = await loadModel(claimed);
+        if (s.currentModelSpawnId !== claimed || s.currentModel) return;
+        if (compass.state().target?.id !== claimed) return;
+        s.scene.add(m);
+        s.currentModel = m;
+        s.mixer = (m.userData.mixer as THREE.AnimationMixer | undefined) ?? null;
+      } catch (e) {
+        console.warn('[hunt] model load failed', e);
+        if (s.currentModelSpawnId === claimed) s.currentModelSpawnId = null;
+        return;
+      }
     }
   }
 

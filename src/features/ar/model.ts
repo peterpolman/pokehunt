@@ -51,6 +51,17 @@ function buildPlaceholder(spawn: Spawn): THREE.Group {
   return g;
 }
 
+/** Sync cache hit — null if not yet loaded. */
+export function getCachedModel(id: number): THREE.Group | null {
+  return cache.get(id) ?? null;
+}
+
+/** Fire-and-forget preload of every spawn, run at session start so target
+ *  swaps later in syncCurrentModel hit cache instantly (no await race). */
+export function preloadModels(ids: number[]): void {
+  for (const id of ids) void loadModel(id);
+}
+
 export function loadModel(id: number): Promise<THREE.Group> {
   const cached = cache.get(id);
   if (cached) return Promise.resolve(cached);

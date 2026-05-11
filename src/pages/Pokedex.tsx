@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import * as THREE from "three";
 import { Compass } from "../adapters/compass.ts";
 import { bootXR } from "../adapters/xr.ts";
+import { preloadModels } from "../features/ar/model.ts";
 import { catchCurrent } from "../features/catch.ts";
 import { capturePhoto } from "../features/photo.ts";
 import { useCompassState } from "../hooks/useCompass.ts";
@@ -72,6 +73,10 @@ export function Pokedex() {
 
   const onStart = () => {
     setPhase("running");
+    // Warm the model cache up-front so target switches in syncCurrentModel
+    // hit cache synchronously — no await window where target ping-pong can
+    // race against an in-flight GLB fetch.
+    preloadModels(SPAWNS.map((s) => s.id));
     compass
       .start()
       .then(() => {
