@@ -42,6 +42,20 @@
     transition: opacity 0.2s ease;
 }
 
+// Below z16 the map view is wider and 44px thumbnails dominate. Shrink the
+// inner sprite; the 44px DivIcon container (and click target) stays put.
+.thumbSmall .spawnSprite {
+    width: 24px;
+    height: 24px;
+    max-width: 24px !important;
+}
+
+// Below z14 the blue catch-radius is a handful of pixels — drop it entirely
+// so it doesn't read as visual noise under the thumbnail.
+.circlesHidden .spawnCircle {
+    display: none;
+}
+
 // User position marker (custom DivIcon wrapping a rotated arrow).
 .userDot {
     position: relative;

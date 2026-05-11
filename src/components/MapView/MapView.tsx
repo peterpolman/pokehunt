@@ -64,6 +64,15 @@ export function MapView({
       onMapClickRef.current?.({ lat: e.latlng.lat, lng: e.latlng.lng });
     });
 
+    const applyZoomClasses = () => {
+      const z = map.getZoom();
+      const el = map.getContainer();
+      el.classList.toggle(s.thumbSmall, z < 16);
+      el.classList.toggle(s.circlesHidden, z < 14);
+    };
+    applyZoomClasses();
+    map.on("zoomend", applyZoomClasses);
+
     mapRef.current = map;
   }, []);
 
@@ -120,6 +129,7 @@ export function MapView({
         opacity: 0.5,
         fillOpacity: 0.08,
         interactive: false,
+        className: s.spawnCircle,
       }).addTo(map);
       spawnMarkersRef.current.set(spawn.id, { marker, circle });
     }
