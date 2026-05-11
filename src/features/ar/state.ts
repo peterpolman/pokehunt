@@ -14,6 +14,7 @@ export interface ArState {
   anchoredAtGps: { lat: number; lng: number } | null;
   anchoredWorldPos: THREE.Vector3 | null;
   anchorCount: number;
+  currentStandSpot: THREE.Mesh | null;
 }
 
 export const arState: ArState = {
@@ -27,6 +28,7 @@ export const arState: ArState = {
   anchoredAtGps: null,
   anchoredWorldPos: null,
   anchorCount: 0,
+  currentStandSpot: null,
 };
 
 export const clock = new THREE.Clock();
@@ -41,4 +43,10 @@ export function resetCurrentModel(): void {
   s.mixer = null;
   s.anchoredForId = null;
   s.anchoredAtGps = null;
+  if (s.currentStandSpot) {
+    if (s.scene) s.scene.remove(s.currentStandSpot);
+    s.currentStandSpot.geometry.dispose();
+    (s.currentStandSpot.material as THREE.Material).dispose();
+    s.currentStandSpot = null;
+  }
 }

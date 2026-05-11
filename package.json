@@ -10,8 +10,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --port 3000",
     "typecheck": "tsc --noEmit",
-    "convert-models": "bash scripts/convert-models.sh",
-    "fetch-sprites": "bash scripts/fetch-sprites.sh"
+    "convert-models": "node scripts/convert-models.mjs",
+    "fetch-pokemon": "node scripts/fetch-pokemon.mjs"
   },
   "dependencies": {
     "leaflet": "^1.9.4",

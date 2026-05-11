@@ -76,13 +76,8 @@ export function loadModel(id: number): Promise<THREE.Group> {
       spawn.model,
       (gltf: GLTF) => {
         const inner = gltf.scene;
-        // FBX-converted GLBs often arrive Z-up; flip when Z extent dominates.
-        const size = new THREE.Vector3();
-        new THREE.Box3().setFromObject(inner).getSize(size);
-        if (size.z > size.y * 1.5) inner.rotation.x = -Math.PI / 2;
-
         // Wrap so per-frame Y-locked lookAt on outer doesn't overwrite
-        // the inner axis-correction rotation.
+        // any per-model rotation we may apply on inner in future.
         const root = new THREE.Group();
         root.add(inner);
         root.scale.setScalar(spawn.scale);
