@@ -17,7 +17,8 @@ export function Hud({ state: cs, visible, onShutter }: Props) {
 
   const d = cs.distance;
   const insideCatch = cs.target !== undefined && d !== undefined && d <= cs.target.catchRadius;
-  const arrowVisible = !insideCatch && !cs.headingStuck && cs.arrowAngle !== undefined;
+  const arrowVisible =
+    cs.arrowAngle !== undefined && (cs.arrowFromAnchor || !cs.headingStuck);
 
   const compassClasses = [s.compass];
   if (d !== undefined && cs.target) {

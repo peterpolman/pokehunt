@@ -66,8 +66,14 @@ interface CompassState {
   ready: boolean;
   target?: Spawn;
   distance?: Meters;
-  /** Bearing relative to the user's current heading, 0=ahead, clockwise. */
+  /** Bearing relative to the user's current heading, 0=ahead, clockwise.
+   *  Prefers the SLAM-derived anchor angle once the model is placed. */
   arrowAngle?: Degrees;
+  /** GPS-bearing-based arrow angle. Engine code (anchoring) reads this so
+   *  the SLAM override never feeds back into anchor placement. */
+  rawArrowAngle?: Degrees;
+  /** True when `arrowAngle` is derived from the SLAM anchor rather than GPS. */
+  arrowFromAnchor: boolean;
   /** Estimated heading jitter over the recent variance window. */
   headingAccuracy?: Degrees;
   foundCount: number;

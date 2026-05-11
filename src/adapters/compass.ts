@@ -53,6 +53,9 @@ export class Compass {
   // GPS jitter at close range gives stale readings; SLAM-derived camera
   // movement gives a smooth "warmer/colder" cue.
   distanceOverride: { id: number; d: Meters } | null = null;
+  // Same idea for the arrow angle: once anchored, the camera->model bearing
+  // in SLAM world space is stable even when GPS bearing wobbles at <5m.
+  angleOverride: { id: number; angle: Degrees } | null = null;
 
   watchId: number | null = null;
   tickId: number | null = null;
@@ -162,11 +165,18 @@ export class Compass {
   }
 
   state(): CompassState {
+    const raw = this._rawArrowAngle();
+    const overrideActive =
+      this.angleOverride !== null &&
+      this.target !== null &&
+      this.angleOverride.id === this.target.id;
     return {
       ready: this.position !== null && this.smoothedHeading !== null,
       target: this.target ?? undefined,
       distance: this._distanceToTarget(),
-      arrowAngle: this._arrowAngle(),
+      arrowAngle: overrideActive ? this.angleOverride!.angle : raw,
+      rawArrowAngle: raw,
+      arrowFromAnchor: overrideActive,
       headingAccuracy: this._headingVariance(),
       foundCount: this.found.size,
       total: SPAWNS.length,
@@ -338,6 +348,11 @@ export class Compass {
     else this.distanceOverride = { id, d };
   }
 
+  setAngleOverride(id: number | null, angle: Degrees | null): void {
+    if (id === null || angle === null) this.angleOverride = null;
+    else this.angleOverride = { id, angle };
+  }
+
   private _distanceToTarget(): Meters | undefined {
     if (!this.target) return undefined;
     if (this.distanceOverride && this.distanceOverride.id === this.target.id) {
@@ -352,7 +367,7 @@ export class Compass {
     );
   }
 
-  private _arrowAngle(): Degrees | undefined {
+  private _rawArrowAngle(): Degrees | undefined {
     if (!this.position || !this.target || this.smoothedHeading === null)
       return undefined;
     const bearing = bearingDegrees(

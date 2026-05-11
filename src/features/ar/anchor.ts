@@ -8,7 +8,7 @@
 //     jitter near the catch radius causes visible teleports).
 
 import * as THREE from 'three';
-import { distanceMeters } from '../../core/geo-utils.ts';
+import { distanceMeters, normalizeDeg } from '../../core/geo-utils.ts';
 import { arState, clock, resetCurrentModel } from './state.ts';
 import { getCachedModel, loadModel } from './model.ts';
 import type { Compass } from '../../adapters/compass.ts';
@@ -40,10 +40,11 @@ export async function syncCurrentModel(compass: Compass): Promise<void> {
     !tgt ||
     gpsDist === undefined ||
     gpsDist > RENDER_DISTANCE ||
-    cs.arrowAngle === undefined
+    cs.rawArrowAngle === undefined
   ) {
     if (s.currentModel) resetCurrentModel();
     compass.setDistanceOverride(null, null);
+    compass.setAngleOverride(null, null);
     return;
   }
 
@@ -101,7 +102,7 @@ export async function syncCurrentModel(compass: Compass): Promise<void> {
   }
 
   if (needsAnchor) {
-    const world = localPos(cs.arrowAngle, gpsDist);
+    const world = localPos(cs.rawArrowAngle, gpsDist);
     s.camera.localToWorld(world);
     // Snap to ground. SLAM world ground sits at y=0 because we seeded the
     // camera at (0, 1.6, 0) in xr.ts onStart. Without this the model floats
@@ -122,16 +123,27 @@ export async function syncCurrentModel(compass: Compass): Promise<void> {
     s.anchorCount++;
   }
 
-  // Live SLAM-derived distance: camera world pos -> anchored model (XZ).
-  // Walking toward the anchor shrinks this even when GPS is jittery.
+  // Live SLAM-derived distance + angle: camera world pos -> anchored model.
+  // Walking toward the anchor shrinks distance; turning rotates angle.
+  // Both stay smooth even when GPS bearing wobbles at <5m.
   if (s.anchoredForId === tgt.id && s.anchoredWorldPos) {
+    // Distance in world XZ — independent of camera tilt.
     const cp = new THREE.Vector3();
     s.camera.getWorldPosition(cp);
     const dx = cp.x - s.anchoredWorldPos.x;
     const dz = cp.z - s.anchoredWorldPos.z;
     compass.setDistanceOverride(tgt.id, Math.hypot(dx, dz) as Meters);
+    // Angle in camera-local frame: matches the `localPos` convention used
+    // for anchoring (0=forward, +90=right). atan2(x, -z) keeps tilt-handling
+    // implicit because phone tilt rotates around camera-X, leaving local.x
+    // unchanged for a target centered horizontally.
+    const local = s.anchoredWorldPos.clone();
+    s.camera.worldToLocal(local);
+    const angle = normalizeDeg((Math.atan2(local.x, -local.z) * 180) / Math.PI);
+    compass.setAngleOverride(tgt.id, angle);
   } else {
     compass.setDistanceOverride(null, null);
+    compass.setAngleOverride(null, null);
   }
 }
 
