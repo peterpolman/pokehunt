@@ -39,7 +39,9 @@ export function Hud({ state: cs, visible, onShutter }: Props) {
 
   return (
     <div className={s.overlay}>
-      {insideCatch && cs.target && <PinchZoom />}
+      {insideCatch && cs.target && (
+        <PinchZoom maxDistance={cs.target.catchRadius} />
+      )}
 
       <div className={s.banners}>
         <div className={banner('', calibrationVisible)}>
