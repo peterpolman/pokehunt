@@ -76,6 +76,11 @@ export function loadModel(id: number): Promise<THREE.Group> {
       spawn.model,
       (gltf: GLTF) => {
         const inner = gltf.scene;
+        // Shift inner so its feet (bbox min.y) sit at local y=0. GLB
+        // origins vary per export (hip, centroid, random) — without this
+        // the model floats or sinks when root.y is set to ground level.
+        const bbox = new THREE.Box3().setFromObject(inner);
+        inner.position.y -= bbox.min.y;
         // Wrap so per-frame Y-locked lookAt on outer doesn't overwrite
         // any per-model rotation we may apply on inner in future.
         const root = new THREE.Group();

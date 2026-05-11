@@ -11,7 +11,6 @@ import * as THREE from 'three';
 import { distanceMeters, normalizeDeg } from '../../core/geo-utils.ts';
 import { arState, clock, resetCurrentModel } from './state.ts';
 import { getCachedModel, loadModel } from './model.ts';
-import { createStandSpot, disposeStandSpot, tickStandSpot } from './standspot.ts';
 import type { Compass } from '../../adapters/compass.ts';
 
 const RENDER_DISTANCE = 25;
@@ -57,7 +56,6 @@ export async function syncCurrentModel(compass: Compass): Promise<void> {
     const cached = getCachedModel(claimed);
     if (cached) {
       if (s.currentModel) s.scene.remove(s.currentModel);
-      disposeStandSpot();
       s.scene.add(cached);
       s.currentModel = cached;
       s.currentModelSpawnId = claimed;
@@ -71,7 +69,6 @@ export async function syncCurrentModel(compass: Compass): Promise<void> {
       // load. On stale claim after await we restore null so the next frame
       // re-evaluates against the actual current target.
       if (s.currentModel) s.scene.remove(s.currentModel);
-      disposeStandSpot();
       s.currentModel = null;
       s.mixer = null;
       s.anchoredForId = null;
@@ -119,10 +116,6 @@ export async function syncCurrentModel(compass: Compass): Promise<void> {
       const cp = new THREE.Vector3();
       s.camera.getWorldPosition(cp);
       s.currentModel.lookAt(cp.x, world.y, cp.z);
-      disposeStandSpot();
-      const ring = createStandSpot(world, cp);
-      s.scene.add(ring);
-      s.currentStandSpot = ring;
     }
     s.anchoredForId = tgt.id;
     s.anchoredAtGps = cs.position ? { lat: cs.position.lat, lng: cs.position.lng } : null;
@@ -164,5 +157,4 @@ export function tickAr(): void {
       if (ch.userData.spin) ch.rotation.y += dt * 1.2;
     }
   }
-  if (s.camera) tickStandSpot(s.camera);
 }
