@@ -2,6 +2,7 @@
 // + camera shutter. Counter / target name / distance live in Header + Footer.
 
 import { VARIANCE_THRESHOLD_HIGH, VARIANCE_THRESHOLD_LOW } from '../../adapters/compass.ts';
+import { PinchZoom } from '../PinchZoom';
 import { Shutter } from '../Shutter';
 import s from './Hud.module.scss';
 
@@ -38,6 +39,8 @@ export function Hud({ state: cs, visible, onShutter }: Props) {
 
   return (
     <div className={s.overlay}>
+      {insideCatch && cs.target && <PinchZoom />}
+
       <div className={s.banners}>
         <div className={banner('', calibrationVisible)}>
           Kompas moet gekalibreerd — beweeg je telefoon in een acht.
