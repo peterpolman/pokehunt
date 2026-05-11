@@ -67,7 +67,6 @@ export function MapView({
     const applyZoomClasses = () => {
       const z = map.getZoom();
       const el = map.getContainer();
-      el.classList.toggle(s.thumbSmall, z < 19);
       el.classList.toggle(s.circlesHidden, z < 14);
     };
     applyZoomClasses();
@@ -159,14 +158,18 @@ export function MapView({
       const latlng: [number, number] = [pos.lat, pos.lng];
       const rot = typeof state.heading === "number" ? state.heading : 0;
       const html = `
-        <div class="${s.userDot}">
-          <div class="${s.userArrow}" style="transform: rotate(${rot}deg)"></div>
+        <div class="${s.userRotator}" style="transform: rotate(${rot}deg)">
+          <div class="${s.userDot}">
+            <div class="${s.userArrow}">
+              <div class="${s.userBall}"></div>
+            </div>
+          </div>
         </div>`;
       const icon = L.divIcon({
         className: s.userIcon,
         html,
-        iconSize: [40, 40],
-        iconAnchor: [20, 20],
+        iconSize: [52, 50],
+        iconAnchor: [26, 20],
       });
       if (!userMarkerRef.current) {
         userMarkerRef.current = L.marker(latlng, {
