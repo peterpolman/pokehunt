@@ -37,9 +37,9 @@ export function MapView({
   const mapRef = useRef<LMap | null>(null);
   const userMarkerRef = useRef<Marker | null>(null);
   const accuracyCircleRef = useRef<Circle | null>(null);
-  const spawnMarkersRef = useRef<Map<number, { marker: Marker; circle: Circle }>>(
-    new Map(),
-  );
+  const spawnMarkersRef = useRef<
+    Map<number, { marker: Marker; circle: Circle }>
+  >(new Map());
   const onMapClickRef = useRef(onMapClick);
   const onMarkerActionRef = useRef(onMarkerAction);
   onMapClickRef.current = onMapClick;
@@ -63,6 +63,14 @@ export function MapView({
     map.on("click", (e: L.LeafletMouseEvent) => {
       onMapClickRef.current?.({ lat: e.latlng.lat, lng: e.latlng.lng });
     });
+
+    const applyZoomClasses = () => {
+      const z = map.getZoom();
+      const el = map.getContainer();
+      el.classList.toggle(s.circlesHidden, z < 14);
+    };
+    applyZoomClasses();
+    map.on("zoomend", applyZoomClasses);
 
     mapRef.current = map;
   }, []);
@@ -120,6 +128,7 @@ export function MapView({
         opacity: 0.5,
         fillOpacity: 0.08,
         interactive: false,
+        className: s.spawnCircle,
       }).addTo(map);
       spawnMarkersRef.current.set(spawn.id, { marker, circle });
     }
@@ -149,14 +158,18 @@ export function MapView({
       const latlng: [number, number] = [pos.lat, pos.lng];
       const rot = typeof state.heading === "number" ? state.heading : 0;
       const html = `
-        <div class="${s.userDot}">
-          <div class="${s.userArrow}" style="transform: rotate(${rot}deg)"></div>
+        <div class="${s.userRotator}" style="transform: rotate(${rot}deg)">
+          <div class="${s.userDot}">
+            <div class="${s.userArrow}">
+              <div class="${s.userBall}"></div>
+            </div>
+          </div>
         </div>`;
       const icon = L.divIcon({
         className: s.userIcon,
         html,
-        iconSize: [40, 40],
-        iconAnchor: [20, 20],
+        iconSize: [52, 50],
+        iconAnchor: [26, 20],
       });
       if (!userMarkerRef.current) {
         userMarkerRef.current = L.marker(latlng, {

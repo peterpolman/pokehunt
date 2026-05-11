@@ -26,14 +26,17 @@
 .userIcon {
     background: transparent;
     border: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-// Sprite <img> we inject into the spawn DivIcon HTML.
+// Sprite <img> we inject into the spawn DivIcon HTML. Rendered at half the
+// 44px DivIcon container; the container (and click target) stays full size.
 .spawnSprite {
-    max-width: 100% !important;
-    max-height: auto;
-    width: auto;
-    height: auto;
+    width: 30px;
+    height: 30px;
+    max-width: 30px !important;
     display: block;
     margin: 0 auto;
     image-rendering: pixelated;
@@ -42,36 +45,74 @@
     transition: opacity 0.2s ease;
 }
 
+// Below z14 the blue catch-radius is a handful of pixels — drop it entirely
+// so it doesn't read as visual noise under the thumbnail.
+.circlesHidden .spawnCircle {
+    display: none;
+}
+
 // User position marker (custom DivIcon wrapping a rotated arrow).
-.userDot {
+.userRotator {
     position: relative;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 52px;
+    height: 50px;
+    // Pivot at the center of the pin's circular head (matches iconAnchor),
+    // so the marker spins in place over the geo-coordinate.
+    transform-origin: 50% 40%;
+    transition: transform 0.1s linear;
+    will-change: transform;
+}
+
+.userDot {
+    position: absolute;
+    inset: 0;
 }
 
 .userArrow {
     position: absolute;
+    top: 2px;
+    left: 50%;
+    width: 36px;
+    height: 36px;
+    margin-left: -18px;
+    background: #d2222a;
+    border: 3px solid #0d0d0d;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    box-sizing: border-box;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35));
+}
+
+// Pure-CSS Pokéball inside the pin head. The 45° rotation counters the
+// pin's -45° so the ball reads upright relative to its parent (it still
+// tilts with bearing because the whole .userDot rotates).
+.userBall {
+    position: absolute;
     top: 50%;
     left: 50%;
-    width: 16px;
-    height: 18px;
-    margin: -9px 0 0 -8px;
-    transform-origin: 50% 50%;
-    transition: transform 0.1s linear;
+    width: 22px;
+    height: 22px;
+    margin: -11px 0 0 -11px;
+    transform: rotate(45deg);
+    border-radius: 50%;
+    border: 2px solid #0d0d0d;
+    box-sizing: border-box;
+    background:
+        linear-gradient(#0d0d0d, #0d0d0d) center / 100% 3px no-repeat,
+        linear-gradient(to bottom, #d2222a 0 50%, #ffffff 50% 100%);
 
-    &::before {
+    &::after {
         content: "";
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 0;
-        height: 0;
-        border-left: 8px solid transparent;
-        border-right: 8px solid transparent;
-        border-bottom: 18px solid #b8202a;
+        top: 50%;
+        left: 50%;
+        width: 8px;
+        height: 8px;
+        margin: -4px 0 0 -4px;
+        background: #ffffff;
+        border: 1.5px solid #0d0d0d;
+        border-radius: 50%;
+        box-sizing: border-box;
     }
 }
 
