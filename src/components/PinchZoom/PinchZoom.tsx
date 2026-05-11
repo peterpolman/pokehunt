@@ -1,20 +1,18 @@
-// Two-finger pinch overlay for the AR view: shifts the active model's
-// world anchor along the current camera->anchor XZ line. Camera stays put;
-// perspective alone scales the apparent size. Mounted only when the user
-// is inside the spawn's catch radius (gating handled by the parent).
+// Two-finger pinch overlay for the AR view: uniformly scales the active
+// model in place. Model's local origin sits at its base (y=0 on ground),
+// so a uniform scale grows it upward — bottom stays planted.
+// Mounted only when the user is inside the spawn's catch radius (gating
+// handled by the parent).
 
 import { useEffect, useRef } from 'react';
-import * as THREE from 'three';
 import { arState } from '../../features/ar/state.ts';
 import s from './PinchZoom.module.scss';
 
 interface Props {
-  /** Hard floor for the pinch-driven distance. Below this the model clips
-   *  into the camera near plane / feels uncomfortable for a selfie. */
-  minDistance?: number;
-  /** Hard ceiling. Caller passes the spawn's catchRadius so all zoom states
-   *  remain catchable. */
-  maxDistance: number;
+  /** Min/max multiplier relative to the model's original (spawn-defined)
+   *  scale. Defaults give roughly a 10x dynamic range centered on 1x. */
+  minFactor?: number;
+  maxFactor?: number;
 }
 
 interface PointerSample {
@@ -22,12 +20,10 @@ interface PointerSample {
   y: number;
 }
 
-export function PinchZoom({ minDistance = 1.5, maxDistance }: Props) {
+export function PinchZoom({ minFactor = 0.3, maxFactor = 3 }: Props) {
   const ref = useRef<HTMLDivElement | null>(null);
-  // Live pointer set + gesture baseline. Plain refs (not state) so pointer
-  // moves don't trigger React re-renders at gesture rate.
   const pointers = useRef<Map<number, PointerSample>>(new Map());
-  const baseline = useRef<{ span: number; distance: number } | null>(null);
+  const baseline = useRef<{ span: number; scale: number } | null>(null);
 
   useEffect(() => {
     const el = ref.current;
@@ -41,63 +37,50 @@ export function PinchZoom({ minDistance = 1.5, maxDistance }: Props) {
       return Math.hypot(a.x - b.x, a.y - b.y);
     };
 
-    const cameraToAnchorXZ = (): { dist: number; nx: number; nz: number; cam: THREE.Vector3 } | null => {
-      const cam = arState.camera;
-      const anchor = arState.anchoredWorldPos;
-      if (!cam || !anchor) return null;
-      const cp = new THREE.Vector3();
-      cam.getWorldPosition(cp);
-      const dx = anchor.x - cp.x;
-      const dz = anchor.z - cp.z;
-      const len = Math.hypot(dx, dz);
-      if (len < 0.001) return null;
-      return { dist: len, nx: dx / len, nz: dz / len, cam: cp };
+    // Original scale captured the first time we touch the model. Used as
+    // the reference for min/max bounds so successive gestures don't
+    // compound (gesture N's baseline would otherwise let the user exceed
+    // maxFactor after a few pinches).
+    const originalScale = (): number | null => {
+      const model = arState.currentModel;
+      if (!model) return null;
+      if (model.userData.pinchBaseScale === undefined) {
+        model.userData.pinchBaseScale = model.scale.x;
+      }
+      return model.userData.pinchBaseScale as number;
     };
 
     const beginIfReady = () => {
       if (pointers.current.size !== 2) return;
-      const cur = cameraToAnchorXZ();
-      if (!cur) return;
-      baseline.current = { span: span(), distance: cur.dist };
+      const model = arState.currentModel;
+      if (!model) return;
+      originalScale();
+      baseline.current = { span: span(), scale: model.scale.x };
     };
 
     const apply = () => {
       const base = baseline.current;
       if (!base || pointers.current.size !== 2) return;
-      const cur = cameraToAnchorXZ();
-      if (!cur) return;
-      const s = span();
-      if (s < 1 || base.span < 1) return;
-      // Standard pinch ratio: spreading fingers (s > base.span) shrinks the
-      // distance, pulling the model in.
-      const target = base.distance * (base.span / s);
-      const newDist = Math.min(Math.max(target, minDistance), maxDistance);
-
-      const nx = cur.cam.x + cur.nx * newDist;
-      const nz = cur.cam.z + cur.nz * newDist;
-
       const model = arState.currentModel;
-      if (model) {
-        model.position.set(nx, 0, nz);
-        if (!model.userData.placeholder) {
-          model.lookAt(cur.cam.x, 0, cur.cam.z);
-        }
-      }
-      // Mutate in place so anchor.ts's per-frame distance override picks up
-      // the new position without any extra plumbing.
-      if (arState.anchoredWorldPos) {
-        arState.anchoredWorldPos.set(nx, 0, nz);
-      }
+      if (!model) return;
+      const orig = originalScale();
+      if (orig === null) return;
+      const cur = span();
+      if (cur < 1 || base.span < 1) return;
+      const target = base.scale * (cur / base.span);
+      const next = Math.min(
+        Math.max(target, orig * minFactor),
+        orig * maxFactor,
+      );
+      // Uniform scale. position.y stays 0, geometry rises from origin, so
+      // the model's base stays planted while the top grows / shrinks.
+      model.scale.set(next, next, next);
     };
 
     const onDown = (e: PointerEvent) => {
-      // Only react to touch contacts. Mouse / pen are unlikely on the
-      // intended phone target and would confuse the two-finger heuristic.
       if (e.pointerType !== 'touch') return;
       pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
       if (pointers.current.size === 2) {
-        // Prevent the second finger from being interpreted as a tap on
-        // anything underneath while the gesture is live.
         e.preventDefault();
         beginIfReady();
       }
@@ -116,15 +99,12 @@ export function PinchZoom({ minDistance = 1.5, maxDistance }: Props) {
     const onUp = (e: PointerEvent) => {
       pointers.current.delete(e.pointerId);
       if (pointers.current.size === 2) {
-        // Three+ fingers reduced back to two: re-baseline so the surviving
-        // pair starts a fresh gesture instead of continuing with stale span.
         beginIfReady();
       } else {
         baseline.current = null;
       }
     };
 
-    // Non-passive so preventDefault works on iOS Safari.
     const opts: AddEventListenerOptions = { passive: false };
     el.addEventListener('pointerdown', onDown, opts);
     el.addEventListener('pointermove', onMove, opts);
@@ -140,7 +120,7 @@ export function PinchZoom({ minDistance = 1.5, maxDistance }: Props) {
       pointers.current.clear();
       baseline.current = null;
     };
-  }, [minDistance, maxDistance]);
+  }, [minFactor, maxFactor]);
 
   return <div ref={ref} className={s.surface} aria-hidden />;
 }
