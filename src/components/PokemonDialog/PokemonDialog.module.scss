@@ -53,12 +53,47 @@ $pdx-blue: #2c8df0;
     }
 }
 
+.searchWrap {
+    padding: 8px 10px;
+    border-bottom: 2px solid $pdx-ink;
+    background: #0b0f17;
+}
+
+.search {
+    width: 100%;
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+    border: 2px solid $pdx-ink;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    outline: none;
+
+    &::placeholder {
+        color: rgba(255, 255, 255, 0.45);
+    }
+
+    &:focus {
+        border-color: $pdx-blue;
+    }
+}
+
 .list {
     list-style: none;
     margin: 0;
     padding: 6px;
     overflow-y: auto;
-    max-height: calc(80vh - 60px);
+    max-height: calc(80vh - 120px);
+}
+
+.empty {
+    text-align: center;
+    padding: 24px 12px;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 13px;
+    letter-spacing: 0.06em;
 }
 
 .item {
