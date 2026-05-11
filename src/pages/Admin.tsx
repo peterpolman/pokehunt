@@ -125,6 +125,7 @@ export function Admin() {
     total: spawns.length,
     source: "none",
     position: position ?? undefined,
+    arrowFromAnchor: false,
     headingStuck: false,
     weakGps: position ? position.accuracy > 20 : false,
   };
