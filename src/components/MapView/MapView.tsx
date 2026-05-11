@@ -37,9 +37,9 @@ export function MapView({
   const mapRef = useRef<LMap | null>(null);
   const userMarkerRef = useRef<Marker | null>(null);
   const accuracyCircleRef = useRef<Circle | null>(null);
-  const spawnMarkersRef = useRef<Map<number, { marker: Marker; circle: Circle }>>(
-    new Map(),
-  );
+  const spawnMarkersRef = useRef<
+    Map<number, { marker: Marker; circle: Circle }>
+  >(new Map());
   const onMapClickRef = useRef(onMapClick);
   const onMarkerActionRef = useRef(onMarkerAction);
   onMapClickRef.current = onMapClick;
@@ -67,7 +67,7 @@ export function MapView({
     const applyZoomClasses = () => {
       const z = map.getZoom();
       const el = map.getContainer();
-      el.classList.toggle(s.thumbSmall, z < 16);
+      el.classList.toggle(s.thumbSmall, z < 19);
       el.classList.toggle(s.circlesHidden, z < 14);
     };
     applyZoomClasses();
