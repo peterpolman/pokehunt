@@ -82,14 +82,14 @@
     background: #d2222a;
     border: 3px solid #0d0d0d;
     border-radius: 50% 50% 50% 0;
-    transform: rotate(-45deg);
+    transform: rotate(135deg);
     box-sizing: border-box;
     filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35));
 }
 
-// Pure-CSS Pokéball inside the pin head. The 45° rotation counters the
-// pin's -45° so the ball reads upright relative to its parent (it still
-// tilts with bearing because the whole .userDot rotates).
+// Pure-CSS Pokéball inside the pin head. Counter-rotates the pin's 135°
+// so the ball reads upright relative to its parent (it still tilts with
+// bearing because the whole .userDot rotates).
 .userBall {
     position: absolute;
     top: 50%;
@@ -97,7 +97,7 @@
     width: 22px;
     height: 22px;
     margin: -11px 0 0 -11px;
-    transform: rotate(45deg);
+    transform: rotate(-135deg);
     border-radius: 50%;
     border: 2px solid #0d0d0d;
     box-sizing: border-box;
