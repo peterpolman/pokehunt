@@ -19,6 +19,8 @@ interface Props {
   onMarkerAction?: (spawnId: number) => void;
   markerActionLabel?: string;
   markersInteractive?: boolean;
+  /** When true, uncaught spawns render as black silhouettes until caught. */
+  silhouetteUncaught?: boolean;
 }
 
 const FALLBACK_CENTER: [number, number] = [52.367, 4.844];
@@ -32,6 +34,7 @@ export function MapView({
   onMarkerAction,
   markerActionLabel,
   markersInteractive,
+  silhouetteUncaught,
 }: Props) {
   const mapEl = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LMap | null>(null);
@@ -96,8 +99,9 @@ export function MapView({
         existing.circle.setLatLng([spawn.lat, spawn.lng]);
         continue;
       }
-      const dim = found.has(spawn.id) ? "opacity:0.55;" : "";
-      const html = `<img class="${s.spawnSprite}" style="${dim}" src="${spawn.image}" alt="${spawn.name}" />`;
+      const silhouette = silhouetteUncaught && !found.has(spawn.id);
+      const cls = silhouette ? `${s.spawnSprite} ${s.silhouette}` : s.spawnSprite;
+      const html = `<img class="${cls}" src="${spawn.image}" alt="${spawn.name}" />`;
       const icon = L.divIcon({
         className: s.spawnIcon,
         html,
@@ -193,9 +197,9 @@ export function MapView({
 
     for (const [id, { marker }] of spawnMarkersRef.current) {
       const img = marker.getElement()?.querySelector("img");
-      if (img) img.style.opacity = found.has(id) ? "0.55" : "1";
+      if (img) img.classList.toggle(s.silhouette, !!silhouetteUncaught && !found.has(id));
     }
-  }, [state, found]);
+  }, [state, found, silhouetteUncaught]);
 
   return (
     <div className={`${s.overlay}${visible ? " " + s.open : ""}`}>

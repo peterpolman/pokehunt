@@ -42,7 +42,11 @@
     image-rendering: pixelated;
     image-rendering: -moz-crisp-edges;
     pointer-events: none;
-    transition: opacity 0.2s ease;
+    transition: filter 0.4s ease;
+}
+
+.silhouette {
+    filter: brightness(0);
 }
 
 // Below z14 the blue catch-radius is a handful of pixels — drop it entirely

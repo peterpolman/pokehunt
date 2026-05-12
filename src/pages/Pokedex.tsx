@@ -144,6 +144,7 @@ export function Pokedex() {
               spawns={SPAWNS}
               found={compass.found}
               visible={showMap}
+              silhouetteUncaught
             />
             <Hud
               state={compassState}
