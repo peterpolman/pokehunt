@@ -18,6 +18,11 @@ const httpsCfg =
 export default defineConfig({
   plugins: [react()],
   publicDir: 'public',
+  css: {
+    preprocessorOptions: {
+      scss: { api: 'modern-compiler' },
+    },
+  },
   server: {
     port: 3000,
     https: httpsCfg,
